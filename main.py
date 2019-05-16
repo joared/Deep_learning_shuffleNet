@@ -134,8 +134,8 @@ def analyze_model(model):
 if __name__ == "__main__":
 	
 	model = model_shuffleNet_cifar10
-	analyze_model(model)
-	#run(model)
+	#analyze_model(model)
+	run(model)
 	#hej
 	
 
