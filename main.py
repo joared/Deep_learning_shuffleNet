@@ -70,7 +70,7 @@ def compute_accuracy(y_pred_batch, y_batch):
 	print("accuracy:", acc)
 	return acc
 
-def run(model, data_path="C:\\Users\\Joris\\deep_learning\\datasets\\cifar-10-batches-py\\data_batch_1"):
+def run(model, data_path="..\\datasets\\cifar-10-batches-py\\data_batch_1"):
 
 	x_batch, y_batch = generate_dataset_cifar10(data_path)
 	x, y, y_pred, loss = model()
@@ -115,6 +115,8 @@ def run(model, data_path="C:\\Users\\Joris\\deep_learning\\datasets\\cifar-10-ba
 		compute_accuracy(y_pred_batch, y_batch)
 	
 def analyze_model(model):
+	pass
+	"""
 	model() # builds the graph
 	n_vars = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
 	print("Trainable variables: ", n_vars)
@@ -126,6 +128,7 @@ def analyze_model(model):
 	flops = tf.profiler.profile(g, run_meta=run_meta, cmd='op', options=opts)
 	if flops is not None:
 		print('TF stats gives',flops.total_float_ops)
+	"""
 	
 if __name__ == "__main__":
 	import tensorflow.python.framework.ops as ops
