@@ -78,7 +78,9 @@ def run(model, data_path="../datasets/cifar-10-batches-py/data_batch_1"):
 	
 	learning_rate = tf.placeholder(tf.float32, shape=[])
 	#lr = 0.00006
-	lr = 0.065
+	lr_start = 0.06
+	lr_end = 0.02
+	lr = lr_start
 	optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
 	
 	init = tf.global_variables_initializer()
@@ -88,7 +90,12 @@ def run(model, data_path="../datasets/cifar-10-batches-py/data_batch_1"):
 		y_pred_batch = session.run(y_pred, {x: x_batch})
 		compute_accuracy(y_pred_batch, y_batch)
 		
-		for epoch in range(200):
+		losses = []
+		accs = []
+		
+		epochs = 50
+		
+		for epoch in range(epochs):
 			perm = np.random.permutation(10000)
 			batch_size = 100
 			batch_nr = 1
@@ -97,22 +104,24 @@ def run(model, data_path="../datasets/cifar-10-batches-py/data_batch_1"):
 				inds = perm[i*batch_size:batch_size*(i+1)]
 				feed_dict = {x: x_batch[inds], y: y_batch[inds], learning_rate: lr}
 				loss_val, op = session.run([loss, optimizer], feed_dict)
-			#if epoch % 100 == 0:
-			#	lr = lr/2
-			#	print("new learning rate:", lr)
-				print(loss_val)
+	
+				#print(loss_val)
 			
-			
+			lr = lr-(lr_start-lr_end)/epochs
+			print("new learning rate", lr)
 			loss_val = session.run(loss, feed_dict = {x: x_batch, y: y_batch})
+			losses.append(loss_val)
 			print("loss:", loss_val.mean())
 			y_pred_batch = session.run(y_pred, {x: x_batch})
-			compute_accuracy(y_pred_batch, y_batch)
-			lr = float(input("new learning rate: "))
+			accs.append(compute_accuracy(y_pred_batch, y_batch))
+			#lr = float(input("new learning rate: "))
 			#optimizer = tf.train.GradientDescentOptimizer(lr).minimize(loss)
 			
 			
 		y_pred_batch = session.run(y_pred, {x: x_batch})
 		compute_accuracy(y_pred_batch, y_batch)
+		
+		return losses, accs
 	
 def analyze_model(model):
 	pass
@@ -135,9 +144,16 @@ if __name__ == "__main__":
 	
 	model = model_shuffleNet_cifar10
 	#analyze_model(model)
-	run(model)
-	#hej
+	losses, accs = run(model)
 	
+	print("before dump", losses[0])
+	with open("data.txt", "wb") as f:
+		pickle.dump((losses, accs), f)
+	
+	with open("data.txt", "rb") as f:
+		losses, accs = pickle.load(f)
+		
+	print("after dump", losses[0])
 
 	
 
