@@ -117,6 +117,7 @@ def run(model, data_path="..\\datasets\\cifar-10-batches-py\\data_batch_1"):
 def analyze_model(model):
 	pass
 	"""
+	import tensorflow.python.framework.ops as ops
 	model() # builds the graph
 	n_vars = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
 	print("Trainable variables: ", n_vars)
@@ -131,7 +132,7 @@ def analyze_model(model):
 	"""
 	
 if __name__ == "__main__":
-	import tensorflow.python.framework.ops as ops
+	
 	model = model_shuffleNet_cifar10
 	analyze_model(model)
 	#run(model)
