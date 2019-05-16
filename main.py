@@ -70,7 +70,7 @@ def compute_accuracy(y_pred_batch, y_batch):
 	print("accuracy:", acc)
 	return acc
 
-def run(model, data_path="..\\datasets\\cifar-10-batches-py\\data_batch_1"):
+def run(model, data_path="../datasets/cifar-10-batches-py/data_batch_1"):
 
 	x_batch, y_batch = generate_dataset_cifar10(data_path)
 	x, y, y_pred, loss = model()
