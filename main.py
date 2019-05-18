@@ -1,159 +1,115 @@
+import os
+import sys
+import argparse
 import tensorflow as tf
 
+import time
 import numpy as np
 
 import pickle
 import matplotlib.pyplot as plt
 
-from deep_utils import generate_dataset_cifar10
-from shufflenet_model import model_shuffleNet_cifar10
+from shufflenet_utils import load_dataset, save_training_data, load_training_data
+from shufflenet_models import load_model, default_model
+#from shufflenet_model_builders import model_shuffleNet_cifar10
 
-def model_cifar10_xxxxxx():
-	x = tf.placeholder(tf.float64, shape=(None, 3072))
-	y = tf.placeholder(tf.float64, shape=(None, 10))
-	print(x.shape)
-	with tf.variable_scope("dafakh"):
-		#w = tf.Variable(np.random.normal(size = [3072, 10]))
-		#y_pred = tf.matmul(x, w)
-		h = tf.layers.dense(x, 50)#, activation = "relu")
-		h2 = tf.layers.dense(h, 50)#, activation = "relu")
-		y_pred = tf.layers.dense(h2, 10)
-		loss = tf.losses.softmax_cross_entropy(y, y_pred)
-		#loss = tf.reduce_mean(tf.square(y_pred-y), 1)
-		
-	return x, y, y_pred, loss
+def train(model, epochs=0, lr=0.06, batch_size=100, data_path="../datasets/cifar-10-batches-py/data_batch_1"):
+	"""
+	Trains model with training data from data_path.
+	"""
+	X, Y = generate_dataset_cifar10(data_path)
+	X = X[:500,:,:,:] ###
+	Y = Y[:500,:] ###
+	N = X.shape[0]
 	
-def model_shuffleNet_cifar10_conv():
-	x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
-	y = tf.placeholder(tf.float32, shape=(None, 10))
-	print(x.shape)
-	with tf.variable_scope("dafakh"):
-		x_norm = tf.image.per_image_standardization(x)
-		conv2d_1 = tf.layers.conv2d(x_norm, 24, (3,3), strides=2, padding="same")
-		conv2d_1 = tf.layers.batch_normalization(conv2d_1)
-		conv2d_1 = tf.nn.relu(conv2d_1)
-		
-		conv2d_2 = tf.layers.conv2d(conv2d_1, 48, (2,2), strides=1, padding="same")
-		conv2d_2 = tf.layers.batch_normalization(conv2d_2)
-		conv2d_2 = tf.nn.relu(conv2d_2)
-		
-		h = tf.layers.flatten(conv2d_2)
-		h = tf.layers.dense(h, 50, activation="relu")#, activation = "relu")
-		
-		y_pred = tf.layers.dense(h, 10)
-		loss = tf.losses.softmax_cross_entropy(y, y_pred)
-		#loss = tf.reduce_mean(tf.square(y_pred-y), 1)
-		
-	return x, y, y_pred, loss
-
-
-class Model:
-	def __init__(self, session=None, x=None, y=None, y_pred=None, loss=None, optimizer=None, learning_rate=None):
-		self.session = session
-		self.x = x
-		self.y = y
-		self.y_pred = y_pred
-		self.loss = loss
-		self.optimizer = optimizer 
-		self.learning_rate = learning_rate
-
-
-def compute_accuracy(y_pred_batch, y_batch):
-	s = 0
-	for p, y in zip(y_pred_batch, y_batch):
-		p_index = np.argmax(p)
-		y_index = np.argmax(y)
-		if p_index == y_index:
-			s += 1
-			
-	acc = s/y_pred_batch.shape[0]
-	print("accuracy:", acc)
-	return acc
-
-def run(model, data_path="../datasets/cifar-10-batches-py/data_batch_1"):
-
-	x_batch, y_batch = generate_dataset_cifar10(data_path)
-	x, y, y_pred, loss = model()
-	
-	
-	learning_rate = tf.placeholder(tf.float32, shape=[])
-	#lr = 0.00006
+	#saver = tf.train.Saver() # for saving model
+	model_name = model.name
+	session = model.sess
+	x = model.x
+	y = model.y
+	y_pred = model.y_pred
+	loss = model.loss
+	optimizer = model.optimizer
+	learning_rate = model.learning_rate
 	lr_start = 0.06
 	lr_end = 0.02
 	lr = lr_start
-	optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
 	
-	init = tf.global_variables_initializer()
-	with tf.Session() as session:
-		session.run(init)
+	with session:
+		# record training data
+		losses = {"train": [], "validation": [], "test": []}
+		accs = {"train": [], "validation": [], "test": []}
 		
-		y_pred_batch = session.run(y_pred, {x: x_batch})
-		compute_accuracy(y_pred_batch, y_batch)
-		
-		losses = []
-		accs = []
-		
-		epochs = 50
-		
-		for epoch in range(epochs):
-			perm = np.random.permutation(10000)
-			batch_size = 100
-			batch_nr = 1
-			print("epoch", epoch)
-			for i in range(int(10000/batch_size)):
+		for epoch in range(1, epochs+1):
+			perm = np.random.permutation(N)
+			print("=========================")
+			print("epoch", epoch, "(steps={})".format(model.global_step.eval()), end="")
+			batch_runs = int(N/batch_size)
+			for i in range(batch_runs):
+				if i == 0 and epoch == 1: start_time = time.time()
 				inds = perm[i*batch_size:batch_size*(i+1)]
-				feed_dict = {x: x_batch[inds], y: y_batch[inds], learning_rate: lr}
-				loss_val, op = session.run([loss, optimizer], feed_dict)
-	
-				#print(loss_val)
+				feed_dict = {x: X[inds], y: Y[inds], learning_rate: lr}
+				session.run(optimizer, feed_dict) # performs gradient descent
+				if i == 0 and epoch == 1:
+					est_time = time.time()-start_time
+					est_time *= (batch_runs-1)
+					print(" - estimated epoch time (min):", time.strftime("%H:%M:%S",time.gmtime(est_time)), end="")
+			print()
+				
+			y_pred_value, loss_value = session.run([y_pred, loss], feed_dict = {x: X, y: Y})
 			
+			losses["train"].append(loss_value)
+			print("loss:", loss_value.mean())
+
+			accuracy = model.compute_accuracy(y_pred_value, Y)
+			accs["train"].append(accuracy)
+			print("accuracy:", accuracy)
+			
+			# linear learning rate decay
 			lr = lr-(lr_start-lr_end)/epochs
-			print("new learning rate", lr)
-			loss_val = session.run(loss, feed_dict = {x: x_batch, y: y_batch})
-			losses.append(loss_val)
-			print("loss:", loss_val.mean())
-			y_pred_batch = session.run(y_pred, {x: x_batch})
-			accs.append(compute_accuracy(y_pred_batch, y_batch))
-			#lr = float(input("new learning rate: "))
-			#optimizer = tf.train.GradientDescentOptimizer(lr).minimize(loss)
-			
-			
-		y_pred_batch = session.run(y_pred, {x: x_batch})
-		compute_accuracy(y_pred_batch, y_batch)
+			print("new learning rate:", round(lr,2))
 		
-		return losses, accs
+		save_training_data([losses, accs], model_name)
+		model.save()
+		
+	return losses, accs
 	
-def analyze_model(model):
-	pass
-	"""
-	import tensorflow.python.framework.ops as ops
-	model() # builds the graph
-	n_vars = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
-	print("Trainable variables: ", n_vars)
-	#for v in tf.trainable_variables():
-	#	print(v)
-	g = tf.get_default_graph()
-	run_meta = tf.RunMetadata()
-	opts = tf.profiler.ProfileOptionBuilder.float_operation()
-	flops = tf.profiler.profile(g, run_meta=run_meta, cmd='op', options=opts)
-	if flops is not None:
-		print('TF stats gives',flops.total_float_ops)
-	"""
+def test():
+	# test to see if run if working properly
+	
+	model_name = "test_model"
+	#model = model_shuffleNet_cifar10(model_name)
+	#model = shufflenet_model(model_name)
+	model = load_model(model_name)
+	losses, accs = train(model, 5)
+	print("losses:", len(losses["train"]))
+	print("accs:", len(accs["train"]))
+	print("================")
+	print("Test finnished")
+	input()
+	quit()
+	
+def test2():
+	data = load_dataset("tiny200")
+	print(data)
+	input()
+	quit()
 	
 if __name__ == "__main__":
+	### TODO ###
+	# import pictures as train, val and test
+	# run from terminal
+	# concat training data saves
 	
-	model = model_shuffleNet_cifar10
-	#analyze_model(model)
-	losses, accs = run(model)
-	
-	print("before dump", losses[0])
-	with open("data.txt", "wb") as f:
-		pickle.dump((losses, accs), f)
-	
-	with open("data.txt", "rb") as f:
-		losses, accs = pickle.load(f)
-		
-	print("after dump", losses[0])
+	test2()
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--data', default="../datasets/cifar-10-batches-py/data_batch_1", help='dataset dir')
+	parser.add_argument('--batch', type=int, default=100, help='batch size')
+	parser.add_argument('--load', help='model name')
+	parser.add_argument('--eval', action='store_true')
+	#parser.add_argument('--flops', action='store_true', help='print flops and exit')
+	args = parser.parse_args()
+
 
 	
 
