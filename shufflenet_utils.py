@@ -88,10 +88,12 @@ def plot_training_data(*model_names):
 		
 		plt.subplot(rows, cols, 1)
 		plt.plot(losses["train"], label=model_name)
+		plt.plot(losses["validation"], label=model_name)
 		plt.ylabel("loss")
 		plt.xlabel("epoch")
 		plt.subplot(rows, cols, 2)
 		plt.plot(accs["train"], label=model_name)
+		plt.plot(accs["validation"], label=model_name)
 		plt.ylabel("accuracy")
 		plt.xlabel("epoch")
 	plt.show()
