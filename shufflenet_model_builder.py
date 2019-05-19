@@ -61,7 +61,7 @@ def shufflenet_model_cifar10_small(name, input_image, group, shuffle):
 	#l = shufflenet_unit("sh3", l, channels[group][0], group, 1, shuffle)
 	#l = shufflenet_unit("sh4", l, channels[group][0], group, 1, shuffle)
 	
-	l = shufflenet_stage("stage_1", l, channels[group][1], 3, group, shuffle)
+	l = shufflenet_stage("stage_1", l, channels[group][0], 3, group, shuffle)
 	
 	l = tf.layers.flatten(l)
 	l = tf.layers.dense(l, 10, use_bias=True)
