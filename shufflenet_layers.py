@@ -56,7 +56,7 @@ def pointwise_gconv(name, l, out_channel, group, activation):
 	l = tf.concat(l_list_2, 3)
 	return activation(l)
 	
-def shufflenet_unit(name, l, out_channel, group, strides):
+def shufflenet_unit(name, l, out_channel, group, strides, shuffle=True):
 	name = name + "_sh" if name else "sh"
 	in_shape = l.get_shape().as_list()
 	in_channel = in_shape[-1]
@@ -67,7 +67,7 @@ def shufflenet_unit(name, l, out_channel, group, strides):
 	group = group if in_channel > 24 else 1
 	l = pointwise_gconv(name + "_pw_1", l, out_channel // 4, group, bn_relu)
 	
-	l = channel_shuffle(l, group)
+	if shuffle: l = channel_shuffle(l, group)
 	l = depthwise_conv(name, l, out_channel // 4, 3, strides=strides)
 	l = tf.layers.batch_normalization(l)
 
@@ -85,7 +85,7 @@ def shufflenet_unit(name, l, out_channel, group, strides):
 		output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
 	return output
 	
-def shufflenet_unit_v2(name, l, out_channel, group, strides):
+def shufflenet_unit_v2(name, l, out_channel, group, strides, shuffle=True):
 	name = name + "_sh" if name else "sh"
 	in_shape = l.get_shape().as_list()
 	in_channel = in_shape[-1]
@@ -96,7 +96,7 @@ def shufflenet_unit_v2(name, l, out_channel, group, strides):
 	group = group if in_channel > 24 else 1
 	l = pointwise_gconv(name + "_pw_1", l, out_channel // 4, group, bn_relu)
 	
-	l = channel_shuffle(l, group)
+	if shuffle: l = channel_shuffle(l, group)
 	l = depthwise_conv(name, l, out_channel // 4, 3, strides=strides)
 	l = tf.layers.batch_normalization(l)
 
@@ -119,10 +119,10 @@ def shufflenet_unit_v2(name, l, out_channel, group, strides):
 		output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
 	return output 
 	
-def shufflenet_stage(stage_name, l, out_channel, repeat, group):
+def shufflenet_stage(stage_name, l, out_channel, repeat, group, shuffle=True):
 	for i in range(repeat+1):
 		name = '{}block{}'.format(stage_name, i)
-		l = shufflenet_unit(name, l, out_channel, group, 2 if i == 0 else 1)
+		l = shufflenet_unit(name, l, out_channel, group, 2 if i == 0 else 1, shuffle)
 	return l
 
 if __name__ == "__main__":

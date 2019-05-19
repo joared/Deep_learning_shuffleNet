@@ -47,21 +47,21 @@ def shufflenet_model_cifar10_big(name, input_image):
 	return l
 
 @default_model
-def shufflenet_model_cifar10_small(name, input_image):
+def shufflenet_model_cifar10_small(name, input_image, group, shuffle):
 	l = tf.layers.conv2d(input_image, 24, 3, strides=1, padding="same")
 	l = bn_relu(l)
-	group = 3
+	
 	channels = {1:[144, 288, 576],
 				2:[200, 400, 800],
 				3:[240, 480, 960],
 				4:[272, 544, 1088],
 				8:[384, 768, 1536]}
 	#l = shufflenet_unit("sh1", l, channels[group][0], group, 2)
-	l = shufflenet_unit_v2("sh2", l, channels[group][0], group, 1)
-	l = shufflenet_unit_v2("sh3", l, channels[group][0], group, 1)
-	l = shufflenet_unit_v2("sh4", l, channels[group][0], group, 1)
+	l = shufflenet_unit_v2("sh2", l, channels[group][0], group, 1, shuffle)
+	l = shufflenet_unit_v2("sh3", l, channels[group][0], group, 1, shuffle)
+	l = shufflenet_unit_v2("sh4", l, channels[group][0], group, 1, shuffle)
 	
-	l = shufflenet_stage("stage_1", l, channels[group][1], 3, group)
+	l = shufflenet_stage("stage_1", l, channels[group][1], 3, group, shuffle)
 	
 	l = tf.layers.flatten(l)
 	l = tf.layers.dense(l, 10, use_bias=True)
