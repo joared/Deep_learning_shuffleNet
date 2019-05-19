@@ -98,7 +98,7 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 def test(args):
 	# test to see if run if working properly
 	
-	model_name = "test_model"
+	model_name = args.model_name
 	
 	if args.load:
 		model = load_model(model_name)
@@ -132,6 +132,7 @@ if __name__ == "__main__":
 	
 	test2()
 	parser = argparse.ArgumentParser()
+	parser.add_argument('model_name', help='mode name')
 	parser.add_argument('--epochs', type=int, default=5, help='epochs')
 	
 	parser.add_argument('--data', default="cifar10", help='dataset')
