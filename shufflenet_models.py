@@ -110,6 +110,9 @@ def default_model(model_func):
 			y_pred = tf.identity(layer, name="y_pred")
 			
 			loss = tf.losses.softmax_cross_entropy(y, y_pred)
+			beta = 0.01
+			for w in tf.trainable_variables():
+				loss += beta*tf.nn.l2_loss(w)
 			loss = tf.identity(loss, name="loss")
 			learning_rate = tf.placeholder(tf.float32, shape=[], name="learning_rate")
 			global_step = tf.Variable(0, trainable=False, name="global_step")
