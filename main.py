@@ -78,7 +78,8 @@ def train(model, epochs, lr, batch_size, dataset="cifar10"):
 				#lr = lr-(lr_start-lr_end)/epochs
 				#lr = exponential_lr(model.global_step.eval())
 				#print("new learning rate:", round(lr,2))
-					
+			
+			"""
 			train_y_pred, train_loss, train_cost = session.run([y_pred, loss, cost], feed_dict = {x: X, y: Y})
 			train_acc = model.compute_accuracy(train_y_pred, Y)
 			losses["train"].append(train_loss)
@@ -95,7 +96,7 @@ def train(model, epochs, lr, batch_size, dataset="cifar10"):
 			print("val loss:", val_loss.mean())
 			print("val cost:", val_cost.mean())
 			print("val acc:", val_acc)
-			
+			"""
 			# linear learning rate decay
 			lr = lr-(lr_start-lr_end)/epochs
 			print("new learning rate:", round(lr,2))
