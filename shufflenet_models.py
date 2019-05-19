@@ -92,8 +92,11 @@ class Model:
 		pre_process = graph.get_tensor_by_name("{}/pre_process:0".format(model_name))
 		y_pred = graph.get_tensor_by_name("{}/y_pred:0".format(model_name))
 		loss = graph.get_tensor_by_name("{}/loss:0".format(model_name))
+		cost = graph.get_tensor_by_name("{}/cost:0".format(model_name))
 		optimizer = graph.get_operation_by_name("{}/optimizer".format(model_name))
 		learning_rate = graph.get_tensor_by_name("{}/learning_rate:0".format(model_name))
+		global_step = graph.get_tensor_by_name("{}/global_step:0".format(model_name))
+		beta = graph.get_tensor_by_name("{}/beta:0".format(model_name))
 		try:
 			global_step = graph.get_tensor_by_name("{}/global_step:0".format(model_name))
 		except:

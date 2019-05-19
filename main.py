@@ -16,14 +16,14 @@ from shufflenet_model_builder import shufflenet_model_cifar10_small, shufflenet_
 def exponential_lr(step):
 	return 0.000001*pow(10, step/65)
 
-def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
+def train(model, epochs, lr, batch_size, dataset="cifar10"):
 	"""
 	Trains model with training data from data_path.
 	"""
 	X, Y, X_val, Y_val = load_dataset(dataset)
 
-	#X = X[0:200, :, :, :]
-	#Y = Y[0:200]
+	X = X[0:200, :, :, :]
+	Y = Y[0:200]
 	#X_val = X_val[0:100, :, :, :]
 	#Y_val = Y_val[0:100]
 	
@@ -42,7 +42,7 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 	optimizer = model.optimizer
 	learning_rate = model.learning_rate
 	lr_start = lr
-	lr_end = 0.1
+	lr_end = 0.02
 	lr = lr_start
 	
 	with session:
@@ -68,7 +68,7 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 				inds = perm[i*batch_size:batch_size*(i+1)]
 				feed_dict = {x: X[inds], y: Y[inds], learning_rate: lr}
 				_, train_loss = session.run([optimizer, loss], feed_dict) # performs gradient descent
-				losses["train"].append(train_loss)
+				#losses["train"].append(train_loss)
 				
 				if i == 0 and epoch == 1:
 					est_time = time.time()-start_time
@@ -80,11 +80,10 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 				
 				# linear learning rate decay
 				#lr = lr-(lr_start-lr_end)/epochs
-				#lr = lr-(lr_start-lr_end)/epochs
-				lr = exponential_lr(model.global_step.eval())
-				print("new learning rate:", round(lr,2))
+				#lr = exponential_lr(model.global_step.eval())
+				#print("new learning rate:", round(lr,2))
 					
-			"""
+			
 			train_y_pred, train_loss, train_cost = session.run([y_pred, loss, cost], feed_dict = {x: X, y: Y})
 			train_acc = model.compute_accuracy(train_y_pred, Y)
 			losses["train"].append(train_loss)
@@ -99,9 +98,8 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 			print("val loss:", val_loss.mean())
 			print("val cost:", val_cost.mean())
 			print("val acc:", val_acc)
-			"""
+			
 			# linear learning rate decay
-			#lr = lr-(lr_start-lr_end)/epochs
 			#lr = lr-(lr_start-lr_end)/epochs
 			#print("new learning rate:", round(lr,2))
 		
@@ -118,11 +116,11 @@ def test(args):
 	if args.load:
 		model = load_model(model_name)
 	else:
-		model = shufflenet_model_cifar10_big(model_name)
-		model.sess.run(model.beta.assign(args.beta))
-		#model = model_conv(model_name)
+		#model = shufflenet_model_cifar10_big(model_name)
+		model = shufflenet_model_cifar10_small(model_name)
+	model.sess.run(model.beta.assign(args.beta))
 	
-	losses, accs = train(model, epochs=args.epochs, lr=args.lr)
+	losses, accs = train(model, args.epochs, args.lr, args.batch)
 	print("================")
 	print("losses:", len(losses["train"]))
 	print("accs:", len(accs["train"]))
@@ -138,9 +136,10 @@ def get_good_learning_rate(lr_start, batch_size=100):
 def test2():
 	#data = load_dataset("tiny200")
 	#print(data)
-	model_name = "test_model"
+	model_name = "learning_rate"
+	losses, accs = load_training_data(model_name)
 	#model_name_2 = "test_model_conv"
-	plot_training_data(model_name)
+	plot_training_data(losses, accs, model_name)
 	input()
 	quit()
 	
@@ -149,20 +148,16 @@ if __name__ == "__main__":
 	# import pictures as train, val and test
 	# run from terminal
 	# concat training data saves
-	print(exponential_lr(400))
-	get_good_learning_rate(lr_start=0.000001, batch_size=100)
-	input()
-	quit()
 	#test2()
 	parser = argparse.ArgumentParser()
 	parser.add_argument('model_name', help='mode name')
 	parser.add_argument('--epochs', type=int, default=5, help='epochs')
-	parser.add_argument('--lr', type=float, default=0.06, help='learning rate')
+	parser.add_argument('--lr', type=float, default=0.083, help='learning rate')
 	
 	parser.add_argument('--data', default="cifar10", help='dataset')
-	#parser.add_argument('--batch', type=int, default=100, help='batch size')
+	parser.add_argument('--batch', type=int, default=100, help='batch size')
 	parser.add_argument('--load', help='model name')
-	parser.add_argument('--beta', type=float, default=0.02, help='beta')
+	parser.add_argument('--beta', type=float, default=0, help='beta')
 	#parser.add_argument('--eval', action='store_true')
 	
 	#parser.add_argument('--flops', action='store_true', help='print flops and exit')

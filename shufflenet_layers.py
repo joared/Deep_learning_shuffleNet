@@ -85,6 +85,40 @@ def shufflenet_unit(name, l, out_channel, group, strides):
 		output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
 	return output
 	
+def shufflenet_unit_v2(name, l, out_channel, group, strides):
+	name = name + "_sh" if name else "sh"
+	in_shape = l.get_shape().as_list()
+	in_channel = in_shape[-1]
+	shortcut = l
+
+	# "We do not apply group convolution on the first pointwise layer
+	#  because the number of input channels is relatively small."
+	group = group if in_channel > 24 else 1
+	l = pointwise_gconv(name + "_pw_1", l, out_channel // 4, group, bn_relu)
+	
+	l = channel_shuffle(l, group)
+	l = depthwise_conv(name, l, out_channel // 4, 3, strides=strides)
+	l = tf.layers.batch_normalization(l)
+
+	if strides == 1:	# unit (b)
+		if out_channel == in_channel:
+		# doubles outputs if strides = 1
+		
+			l = pointwise_gconv(name + "_pw_2", l, out_channel, group, tf.layers.batch_normalization)
+			output = tf.nn.relu(shortcut + l)
+		else:
+			out_pw = out_channel - in_channel
+			l = pointwise_gconv(name + "_pw_2", l, out_pw, group, tf.layers.batch_normalization)
+			output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
+		
+	else:	# unit (c)
+		shortcut = tf.nn.avg_pool(shortcut, [1,3,3,1], [1,2,2,1], padding='SAME')
+		
+		# which one to use?
+		#output = tf.concat([shortcut, tf.nn.relu(l)], axis=3)
+		output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
+	return output 
+	
 def shufflenet_stage(stage_name, l, out_channel, repeat, group):
 	for i in range(repeat+1):
 		name = '{}block{}'.format(stage_name, i)
