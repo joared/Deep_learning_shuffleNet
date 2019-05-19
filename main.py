@@ -130,7 +130,7 @@ if __name__ == "__main__":
 	# run from terminal
 	# concat training data saves
 	
-	test2()
+	#test2()
 	parser = argparse.ArgumentParser()
 	parser.add_argument('model_name', help='mode name')
 	parser.add_argument('--epochs', type=int, default=5, help='epochs')
