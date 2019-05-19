@@ -95,6 +95,7 @@ def test(args):
 		model = load_model(model_name)
 	else:
 		model = shufflenet_model(model_name)
+		model.beta.assign(args.beta)
 		#model = model_conv(model_name)
 	
 	losses, accs = train(model, args.epochs)
@@ -127,6 +128,7 @@ if __name__ == "__main__":
 	parser.add_argument('--data', default="cifar10", help='dataset')
 	#parser.add_argument('--batch', type=int, default=100, help='batch size')
 	parser.add_argument('--load', help='model name')
+	parser.add_argument('--beta', type=float, default=0.02, help='beta')
 	#parser.add_argument('--eval', action='store_true')
 	#parser.add_argument('--flops', action='store_true', help='print flops and exit')
 	args = parser.parse_args()

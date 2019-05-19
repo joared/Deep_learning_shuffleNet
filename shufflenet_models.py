@@ -15,13 +15,14 @@ class Model:
 				optimizer, 
 				learning_rate,
 				global_step,
+				beta,
 				session=None):
 		
 		assert isinstance(name, str), name
 		if session is not None: assert isinstance(session, tf.Session)
 		
-		for var, var_name in zip([x,y,pre_process,y_pred,loss,optimizer,learning_rate,global_step],
-							["x:0","y:0","pre_process:0","y_pred:0","loss:0","optimizer","learning_rate:0","global_step:0"]):
+		for var, var_name in zip([x,y,pre_process,y_pred,loss,optimizer,learning_rate,global_step,beta],
+							["x:0","y:0","pre_process:0","y_pred:0","loss:0","optimizer","learning_rate:0","global_step:0","beta:0"]):
 			var_name = "{}/{}".format(name, var_name)
 			if var is not None: assert var.name == var_name, "{} != {}".format(var.name, var_name)
 		
@@ -35,6 +36,7 @@ class Model:
 		self.optimizer = optimizer 
 		self.learning_rate = learning_rate
 		self.global_step = global_step
+		self.beta = beta
 		
 		if session is None:
 			self.sess = tf.Session()
@@ -110,7 +112,7 @@ def default_model(model_func):
 			y_pred = tf.identity(layer, name="y_pred")
 			
 			loss = tf.losses.softmax_cross_entropy(y, y_pred)
-			beta = 0.01
+			beta = tf.Variable(0.01, trainable=False, name="beta")
 			for w in tf.trainable_variables():
 				loss += beta*tf.nn.l2_loss(w)
 			loss = tf.identity(loss, name="loss")
@@ -119,7 +121,7 @@ def default_model(model_func):
 			optimizer = tf.train.GradientDescentOptimizer(learning_rate)
 			optimizer = optimizer.minimize(loss, global_step, name="optimizer")
 			
-		return Model(name, x, y, pre_process, y_pred, loss, optimizer, learning_rate, global_step)
+		return Model(name, x, y, pre_process, y_pred, loss, optimizer, learning_rate, global_step, beta)
 	return wrap
 
 load_model = Model.load
