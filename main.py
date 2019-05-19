@@ -97,6 +97,7 @@ def test():
 	
 def test2():
 	data = load_dataset("tiny200")
+	print(data)
 	model_name = "test_model"
 	model_name_2 = "test_model_conv"
 	plot_training_data(model_name, model_name_2)
