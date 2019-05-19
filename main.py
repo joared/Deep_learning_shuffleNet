@@ -38,8 +38,8 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 	cost = model.cost
 	optimizer = model.optimizer
 	learning_rate = model.learning_rate
-	lr_start = 0.06
-	lr_end = 0.02
+	lr_start = lr
+	lr_end = 0.06
 	lr = lr_start
 	
 	with session:
@@ -107,7 +107,7 @@ def test(args):
 		model.sess.run(model.beta.assign(args.beta))
 		#model = model_conv(model_name)
 	
-	losses, accs = train(model, args.epochs)
+	losses, accs = train(model, epochs=args.epochs, lr=args.lr)
 	print("================")
 	print("losses:", len(losses["train"]))
 	print("accs:", len(accs["train"]))
@@ -134,6 +134,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument('model_name', help='mode name')
 	parser.add_argument('--epochs', type=int, default=5, help='epochs')
+	parser.add_argument('--lr', type=float, default=0.06, help='learning rate')
 	
 	parser.add_argument('--data', default="cifar10", help='dataset')
 	#parser.add_argument('--batch', type=int, default=100, help='batch size')
