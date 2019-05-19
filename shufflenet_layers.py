@@ -72,20 +72,17 @@ def shufflenet_unit(name, l, out_channel, group, strides):
 	l = tf.layers.batch_normalization(l)
 
 	# doubles outputs if strides = 1
-	chan_out = out_channel if strides == 1 else out_channel - in_channel
+	out_channel = out_channel if strides == 1 else out_channel - in_channel
+	l = pointwise_gconv(name + "_pw_2", l, out_channel, group, tf.layers.batch_normalization)
 	
-	l = pointwise_gconv(name + "_pw_2", l,
-			out_channel if strides == 1 else out_channel - in_channel, 
-			group, tf.layers.batch_normalization)
-	l = tf.layers.batch_normalization(l)
 	if strides == 1:	# unit (b)
 		output = tf.nn.relu(shortcut + l)
 	else:	# unit (c)
 		shortcut = tf.nn.avg_pool(shortcut, [1,3,3,1], [1,2,2,1], padding='SAME')
 		
 		# which one to use?
-		output = tf.concat([shortcut, tf.nn.relu(l)], axis=3)
-		#output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
+		#output = tf.concat([shortcut, tf.nn.relu(l)], axis=3)
+		output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
 	return output
 	
 def shufflenet_stage_1():
