@@ -100,8 +100,8 @@ def train(model, epochs, lr, batch_size, dataset="cifar10"):
 			print("val acc:", val_acc)
 			
 			# linear learning rate decay
-			#lr = lr-(lr_start-lr_end)/epochs
-			#print("new learning rate:", round(lr,2))
+			lr = lr-(lr_start-lr_end)/epochs
+			print("new learning rate:", round(lr,2))
 		
 		save_training_data([losses, accs], model_name)
 		model.save()
