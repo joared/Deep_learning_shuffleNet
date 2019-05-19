@@ -45,6 +45,7 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 	with session:
 		print("preprocessing images...")
 		X = session.run(model.pre_process, {x: X})
+		X_val = session.run(model.pre_process, {x: X_val})
 		print("...preprocessing done!")
 		
 		# record training data
