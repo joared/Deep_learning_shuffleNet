@@ -121,7 +121,7 @@ def shufflenet_unit_v2(name, l, out_channel, group, strides, shuffle=True):
 	
 def shufflenet_stage(stage_name, l, out_channel, repeat, group, shuffle=True):
 	for i in range(repeat+1):
-		name = '{}block{}'.format(stage_name, i)
+		name = '{}_block{}'.format(stage_name, i)
 		l = shufflenet_unit(name, l, out_channel, group, 2 if i == 0 else 1, shuffle)
 	return l
 
