@@ -58,8 +58,8 @@ def shufflenet_model_cifar10_small(name, input_image, group, shuffle):
 				8:[384, 768, 1536]}
 	#l = shufflenet_unit("sh1", l, channels[group][0], group, 2)
 	l = shufflenet_unit_v2("sh2", l, channels[group][0], group, 1, shuffle)
-	l = shufflenet_unit_v2("sh3", l, channels[group][0], group, 1, shuffle)
-	l = shufflenet_unit_v2("sh4", l, channels[group][0], group, 1, shuffle)
+	l = shufflenet_unit("sh3", l, channels[group][0], group, 1, shuffle)
+	l = shufflenet_unit("sh4", l, channels[group][0], group, 1, shuffle)
 	
 	l = shufflenet_stage("stage_1", l, channels[group][1], 3, group, shuffle)
 	
