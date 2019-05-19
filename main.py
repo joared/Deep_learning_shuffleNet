@@ -22,8 +22,8 @@ def train(model, epochs, lr, batch_size, dataset="cifar10"):
 	"""
 	X, Y, X_val, Y_val = load_dataset(dataset)
 
-	X = X[0:200, :, :, :]
-	Y = Y[0:200]
+	#X = X[0:200, :, :, :]
+	#Y = Y[0:200]
 	#X_val = X_val[0:100, :, :, :]
 	#Y_val = Y_val[0:100]
 	
