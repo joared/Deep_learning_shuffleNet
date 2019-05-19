@@ -33,24 +33,9 @@ def shufflenet_model_cifar10_big(name, input_image):
 				3:[240, 480, 960],
 				4:[272, 544, 1088],
 				8:[384, 768, 1536]}
-	l = shufflenet_unit("sh1", l, channels[group][0], group, 2)
-	l = shufflenet_unit("sh2", l, channels[group][0], group, 1)
-	l = shufflenet_unit("sh3", l, channels[group][0], group, 1)
-	l = shufflenet_unit("sh4", l, channels[group][0], group, 1)
-	
-	l = shufflenet_unit("sh5", l, channels[group][1], group, 2)
-	l = shufflenet_unit("sh6", l, channels[group][1], group, 1)
-	l = shufflenet_unit("sh7", l, channels[group][1], group, 1)
-	l = shufflenet_unit("sh8", l, channels[group][1], group, 1)
-	l = shufflenet_unit("sh9", l, channels[group][1], group, 1)
-	l = shufflenet_unit("sh10", l, channels[group][1], group, 1)
-	l = shufflenet_unit("sh11", l, channels[group][1], group, 1)
-	l = shufflenet_unit("sh12", l, channels[group][1], group, 1)
-	
-	l = shufflenet_unit("sh13", l, channels[group][2], group, 2)
-	l = shufflenet_unit("sh14", l, channels[group][2], group, 1)
-	l = shufflenet_unit("sh15", l, channels[group][2], group, 1)
-	l = shufflenet_unit("sh16", l, channels[group][2], group, 1)
+	l = shufflenet_stage("stage_1", l, channels[group][0], 3, group)
+	l = shufflenet_stage("stage_2", l, channels[group][1], 7, group)
+	l = shufflenet_stage("stage_3", l, channels[group][2], 3, group)
 	
 	# global avg pooling with relu
 	#l = tf.reduce_mean(l, [1,2])

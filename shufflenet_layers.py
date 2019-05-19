@@ -85,9 +85,11 @@ def shufflenet_unit(name, l, out_channel, group, strides):
 		output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
 	return output
 	
-def shufflenet_stage_1():
-	pass
-	
+def shufflenet_stage(stage_name, l, out_channel, repeat, group):
+	for i in range(repeat+1):
+		name = '{}block{}'.format(stage_name, i)
+		l = shufflenet_unit(name, l, out_channel, group, 2 if i == 0 else 1)
+	return l
 
 if __name__ == "__main__":
 	pass
