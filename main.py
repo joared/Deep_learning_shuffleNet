@@ -132,7 +132,7 @@ def test(args):
 	
 def get_good_learning_rate(lr_start, batch_size=100):
 	model = shufflenet_model_cifar10_big("learning_rate")
-	losses, accs = train(model, epochs=1, lr=lr_start, batch_size=100, dataset="cifar10")
+	losses, accs = train(model, epochs=4, lr=lr_start, batch_size=100, dataset="cifar10")
 	plot_training_data(losses, None)
 	
 def test2():
