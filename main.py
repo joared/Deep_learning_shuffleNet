@@ -140,6 +140,7 @@ if __name__ == "__main__":
 	parser.add_argument('--load', help='model name')
 	parser.add_argument('--beta', type=float, default=0.02, help='beta')
 	#parser.add_argument('--eval', action='store_true')
+	
 	#parser.add_argument('--flops', action='store_true', help='print flops and exit')
 	args = parser.parse_args()
 	test(args)
