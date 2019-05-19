@@ -123,7 +123,7 @@ def default_model(model_func):
 			learning_rate = tf.placeholder(tf.float32, shape=[], name="learning_rate")
 			global_step = tf.Variable(0, trainable=False, name="global_step")
 			optimizer = tf.train.GradientDescentOptimizer(learning_rate)
-			optimizer = optimizer.minimize(loss, global_step, name="optimizer")
+			optimizer = optimizer.minimize(cost, global_step, name="optimizer")
 			
 		return Model(name, x, y, pre_process, y_pred, loss, cost, optimizer, learning_rate, global_step, beta)
 	return wrap

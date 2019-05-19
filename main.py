@@ -116,11 +116,11 @@ def test(args):
 	quit()
 	
 def test2():
-	data = load_dataset("tiny200")
-	print(data)
+	#data = load_dataset("tiny200")
+	#print(data)
 	model_name = "test_model"
-	model_name_2 = "test_model_conv"
-	plot_training_data(model_name, model_name_2)
+	#model_name_2 = "test_model_conv"
+	plot_training_data(model_name)
 	input()
 	quit()
 	
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 	# run from terminal
 	# concat training data saves
 	
-	
+	test2()
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--epochs', type=int, default=5, help='epochs')
 	
