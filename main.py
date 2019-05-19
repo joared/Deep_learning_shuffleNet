@@ -9,17 +9,17 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
-from shufflenet_utils import load_dataset, save_training_data, load_training_data
-from shufflenet_models import load_model, default_model
-#from shufflenet_model_builders import model_shuffleNet_cifar10
+from shufflenet_utils import load_dataset, save_training_data, load_training_data, plot_training_data
+from shufflenet_models import load_model
+from shufflenet_model_builder import shufflenet_model, model_conv
 
 def train(model, epochs=0, lr=0.06, batch_size=100, data_path="../datasets/cifar-10-batches-py/data_batch_1"):
 	"""
 	Trains model with training data from data_path.
 	"""
-	X, Y = generate_dataset_cifar10(data_path)
-	X = X[:500,:,:,:] ###
-	Y = Y[:500,:] ###
+	X, Y = load_dataset("cifar10")
+	#X = X[:500,:,:,:] ###
+	#Y = Y[:500,:] ###
 	N = X.shape[0]
 	
 	#saver = tf.train.Saver() # for saving model
@@ -36,10 +36,15 @@ def train(model, epochs=0, lr=0.06, batch_size=100, data_path="../datasets/cifar
 	lr = lr_start
 	
 	with session:
+		print("preprocessing images...")
+		X = session.run(model.pre_process, {x: X})
+		print("...preprocessing done!")
+		
 		# record training data
 		losses = {"train": [], "validation": [], "test": []}
 		accs = {"train": [], "validation": [], "test": []}
 		
+		print("Training...")
 		for epoch in range(1, epochs+1):
 			perm = np.random.permutation(N)
 			print("=========================")
@@ -77,21 +82,24 @@ def train(model, epochs=0, lr=0.06, batch_size=100, data_path="../datasets/cifar
 def test():
 	# test to see if run if working properly
 	
-	model_name = "test_model"
-	#model = model_shuffleNet_cifar10(model_name)
+	model_name = "test_model_conv"
+	
 	#model = shufflenet_model(model_name)
-	model = load_model(model_name)
+	model = model_conv(model_name)
+	#model = load_model(model_name)
 	losses, accs = train(model, 5)
+	print("================")
 	print("losses:", len(losses["train"]))
 	print("accs:", len(accs["train"]))
-	print("================")
 	print("Test finnished")
 	input()
 	quit()
 	
 def test2():
 	data = load_dataset("tiny200")
-	print(data)
+	model_name = "test_model"
+	model_name_2 = "test_model_conv"
+	plot_training_data(model_name, model_name_2)
 	input()
 	quit()
 	

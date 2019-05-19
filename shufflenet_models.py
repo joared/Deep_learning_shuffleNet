@@ -29,6 +29,7 @@ class Model:
 		self.sess = session
 		self.x = x
 		self.y = y
+		self.pre_process = pre_process
 		self.y_pred = y_pred
 		self.loss = loss
 		self.optimizer = optimizer 
@@ -84,6 +85,7 @@ class Model:
 		
 		x = graph.get_tensor_by_name("{}/x:0".format(model_name))
 		y = graph.get_tensor_by_name("{}/y:0".format(model_name))
+		pre_process = graph.get_tensor_by_name("{}/pre_process:0".format(model_name))
 		y_pred = graph.get_tensor_by_name("{}/y_pred:0".format(model_name))
 		loss = graph.get_tensor_by_name("{}/loss:0".format(model_name))
 		optimizer = graph.get_operation_by_name("{}/optimizer".format(model_name))
@@ -93,7 +95,7 @@ class Model:
 		except:
 			print("no global step tensor found...")
 		
-		return Model(model_name, x, y, y_pred, loss, optimizer, learning_rate, global_step, session=sess)
+		return Model(model_name, x, y, pre_process, y_pred, loss, optimizer, learning_rate, global_step, session=sess)
 
 def default_model(model_func):
 	# Change this wrapper, i doesnt make sense
@@ -104,7 +106,7 @@ def default_model(model_func):
 			pre_process = tf.image.per_image_standardization(x)
 			pre_process = tf.identity(pre_process, name="pre_process")
 			
-			layer = model_func(name, pre_process, *args, *kwargs)
+			layer = model_func(name, x, *args, *kwargs)
 			y_pred = tf.identity(layer, name="y_pred")
 			
 			loss = tf.losses.softmax_cross_entropy(y, y_pred)

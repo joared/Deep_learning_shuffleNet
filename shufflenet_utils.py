@@ -44,13 +44,6 @@ def load_dataset(dataset):
 		return generate_dataset_cifar10("../datasets/cifar-10-batches-py/data_batch_1")
 	elif dataset == "tiny200":
 		return load_tiny_imagenet(path="../datasets/tiny-imagenet-200/tiny-imagenet-200", wnids_path="", resize='False', num_classes=200, dtype=np.float32)
-		
-
-def plot(x_data):
-	x_data = x_data.reshape([10000, 3, 32, 32]).transpose(0,2,3,1).astype("uint8")
-	im = x_data[0]
-	plt.imshow(im)
-	plt.show()
 	
 def save_training_data(data, model_name):
 	if not os.path.isdir("models"):
@@ -62,10 +55,26 @@ def save_training_data(data, model_name):
 		pickle.dump(data, f)
 
 def load_training_data(model_name):
-	path = os.path.join("models", model_name + "/training_data.txt")
+	path = os.path.join("models", model_name, "training_data.txt")
 	with open(path, "rb") as f:
 		data = pickle.load(f)
 	return data
+	
+def plot_training_data(*model_names):
+	rows = 1 # len(model_names)
+	cols = 2
+	for i, model_name in enumerate(model_names):
+		losses, accs = load_training_data(model_name)
+		
+		plt.subplot(rows, cols, 1)
+		plt.plot(losses["train"], label=model_name)
+		plt.ylabel("loss")
+		plt.xlabel("epoch")
+		plt.subplot(rows, cols, 2)
+		plt.plot(accs["train"], label=model_name)
+		plt.ylabel("accuracy")
+		plt.xlabel("epoch")
+	plt.show()
 		
 def analyze_model(model):
 	pass
