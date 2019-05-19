@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from shufflenet_utils import load_dataset, save_training_data, load_training_data, plot_training_data
 from shufflenet_models import load_model
-from shufflenet_model_builder import shufflenet_model, model_conv
+from shufflenet_model_builder import shufflenet_model_cifar10_small, model_conv
 
 def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 	"""
@@ -103,7 +103,7 @@ def test(args):
 	if args.load:
 		model = load_model(model_name)
 	else:
-		model = shufflenet_model(model_name)
+		model = shufflenet_model_cifar10_small(model_name)
 		model.sess.run(model.beta.assign(args.beta))
 		#model = model_conv(model_name)
 	
