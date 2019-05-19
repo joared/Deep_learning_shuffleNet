@@ -19,8 +19,8 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 	"""
 	X, Y, X_val, Y_val = load_dataset(dataset)
 	
-	X = X + X_val
-	Y = Y + Y_val
+	X = np.concatenate([X, X_val], axis=0)
+	Y = np.concatenate([Y, Y_val], axis=0)
 	#X = X[0:500, :, :, :]
 	#Y = Y[0:500]
 	
