@@ -18,11 +18,14 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 	Trains model with training data from data_path.
 	"""
 	X, Y, X_val, Y_val = load_dataset(dataset)
+
+	X = X[0:500, :, :, :]
+	Y = Y[0:500]
+	X_val = X_val[0:100, :, :, :]
+	Y_val = Y_val[0:100]
 	
 	X = np.concatenate([X, X_val], axis=0)
 	Y = np.concatenate([Y, Y_val], axis=0)
-	#X = X[0:500, :, :, :]
-	#Y = Y[0:500]
 	
 	N = X.shape[0]
 	
@@ -32,6 +35,7 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 	y = model.y
 	y_pred = model.y_pred
 	loss = model.loss
+	cost = model.cost
 	optimizer = model.optimizer
 	learning_rate = model.learning_rate
 	lr_start = 0.06
@@ -64,19 +68,21 @@ def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 					print(" - estimated epoch time (min):", time.strftime("%H:%M:%S",time.gmtime(est_time)), end="")
 			print()
 				
-			train_y_pred, train_loss = session.run([y_pred, loss], feed_dict = {x: X, y: Y})
+			train_y_pred, train_loss, train_cost = session.run([y_pred, loss, cost], feed_dict = {x: X, y: Y})
 			train_acc = model.compute_accuracy(train_y_pred, Y)
 			losses["train"].append(train_loss)
 			accs["train"].append(train_acc)
 			
-			val_y_pred, val_loss = session.run([y_pred, loss], feed_dict = {x: X_val, y: Y_val})
+			val_y_pred, val_loss, val_cost = session.run([y_pred, loss, cost], feed_dict = {x: X_val, y: Y_val})
 			val_acc = model.compute_accuracy(val_y_pred, Y_val)
 			losses["validation"].append(val_loss)
 			accs["validation"].append(val_acc)
 			
-			print("train loss:", train_loss.mean())
+			print("train loss:", train_loss)
+			print("train cost:", train_cost.mean())
 			print("train acc:", train_acc)
 			print("val loss:", val_loss.mean())
+			print("val cost:", val_cost.mean())
 			print("val acc:", val_acc)
 			
 			# linear learning rate decay
@@ -97,7 +103,7 @@ def test(args):
 		model = load_model(model_name)
 	else:
 		model = shufflenet_model(model_name)
-		model.beta.assign(args.beta)
+		model.sess.run(model.beta.assign(args.beta))
 		#model = model_conv(model_name)
 	
 	losses, accs = train(model, args.epochs)
