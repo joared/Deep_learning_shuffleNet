@@ -43,7 +43,7 @@ def load_dataset(dataset):
 	if dataset == "cifar10":
 		return generate_dataset_cifar10("../datasets/cifar-10-batches-py/data_batch_1")
 	elif dataset == "tiny200":
-		return load_tiny_imagenet(path="../datasets/tiny-imagenet-200/tiny-imagenet-200", wnids_path="", resize='False', num_classes=200, dtype=np.float32)
+		return load_tiny_imagenet(path="../datasets/tiny-imagenet-200/", wnids_path="", resize='False', num_classes=200, dtype=np.float32)
 	
 def save_training_data(data, model_name):
 	if not os.path.isdir("models"):
