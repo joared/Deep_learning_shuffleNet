@@ -13,16 +13,17 @@ from shufflenet_utils import load_dataset, save_training_data, load_training_dat
 from shufflenet_models import load_model
 from shufflenet_model_builder import shufflenet_model, model_conv
 
-def train(model, epochs=0, lr=0.06, batch_size=100, data_path="../datasets/cifar-10-batches-py/data_batch_1"):
+def train(model, epochs=0, lr=0.06, batch_size=100, dataset="cifar10"):
 	"""
 	Trains model with training data from data_path.
 	"""
-	X, Y = load_dataset("cifar10")
-	#X = X[:500,:,:,:] ###
-	#Y = Y[:500,:] ###
+	X, Y, X_val, Y_val = load_dataset(dataset)
+	
+	#X = X[0:500, :, :, :]
+	#Y = Y[0:500]
+	
 	N = X.shape[0]
 	
-	#saver = tf.train.Saver() # for saving model
 	model_name = model.name
 	session = model.sess
 	x = model.x
@@ -61,14 +62,20 @@ def train(model, epochs=0, lr=0.06, batch_size=100, data_path="../datasets/cifar
 					print(" - estimated epoch time (min):", time.strftime("%H:%M:%S",time.gmtime(est_time)), end="")
 			print()
 				
-			y_pred_value, loss_value = session.run([y_pred, loss], feed_dict = {x: X, y: Y})
+			train_y_pred, train_loss = session.run([y_pred, loss], feed_dict = {x: X, y: Y})
+			train_acc = model.compute_accuracy(train_y_pred, Y)
+			losses["train"].append(train_loss)
+			accs["train"].append(train_acc)
 			
-			losses["train"].append(loss_value)
-			print("loss:", loss_value.mean())
-
-			accuracy = model.compute_accuracy(y_pred_value, Y)
-			accs["train"].append(accuracy)
-			print("accuracy:", accuracy)
+			val_y_pred, val_loss = session.run([y_pred, loss], feed_dict = {x: X_val, y: Y_val})
+			val_acc = model.compute_accuracy(val_y_pred, Y_val)
+			losses["validation"].append(val_loss)
+			accs["validation"].append(val_acc)
+			
+			print("train loss:", train_loss.mean())
+			print("train acc:", train_acc)
+			print("val loss:", val_loss.mean())
+			print("val acc:", val_acc)
 			
 			# linear learning rate decay
 			lr = lr-(lr_start-lr_end)/epochs
@@ -79,15 +86,18 @@ def train(model, epochs=0, lr=0.06, batch_size=100, data_path="../datasets/cifar
 		
 	return losses, accs
 	
-def test():
+def test(args):
 	# test to see if run if working properly
 	
-	model_name = "test_model_conv"
+	model_name = "test_model"
 	
-	#model = shufflenet_model(model_name)
-	model = model_conv(model_name)
-	#model = load_model(model_name)
-	losses, accs = train(model, 5)
+	if args.load:
+		model = load_model(model_name)
+	else:
+		model = shufflenet_model(model_name)
+		#model = model_conv(model_name)
+	
+	losses, accs = train(model, args.epochs)
 	print("================")
 	print("losses:", len(losses["train"]))
 	print("accs:", len(accs["train"]))
@@ -110,14 +120,17 @@ if __name__ == "__main__":
 	# run from terminal
 	# concat training data saves
 	
-	test2()
+	
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--data', default="../datasets/cifar-10-batches-py/data_batch_1", help='dataset dir')
-	parser.add_argument('--batch', type=int, default=100, help='batch size')
+	parser.add_argument('--epochs', type=int, default=5, help='epochs')
+	
+	parser.add_argument('--data', default="cifar10", help='dataset')
+	#parser.add_argument('--batch', type=int, default=100, help='batch size')
 	parser.add_argument('--load', help='model name')
-	parser.add_argument('--eval', action='store_true')
+	#parser.add_argument('--eval', action='store_true')
 	#parser.add_argument('--flops', action='store_true', help='print flops and exit')
 	args = parser.parse_args()
+	test(args)
 
 
 	

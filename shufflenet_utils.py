@@ -24,7 +24,7 @@ def generate_dataset_tiny_200(dir="../dataset/tiny-imagenet-200", flatten=False)
 		im_path = ""
 """
 
-def generate_dataset_cifar10(file_name, flatten=False):
+def generate_dataset_cifar10(file_name, train_val_split=0.9, flatten=False):
 	with open(file_name, 'rb') as fo:
 		#dict = pickle.load(fo, encoding="latin1")
 		dict = pickle.load(fo, encoding="latin1")
@@ -37,13 +37,33 @@ def generate_dataset_cifar10(file_name, flatten=False):
 	labels = np.zeros((10000, 10))
 	labels[np.arange(10000), labels_val] = 1
 	
-	return features, labels
+	N = features.shape[0]
+	perm = np.random.permutation(N)
+
+	train_inds = perm[0:int(train_val_split*N)]
+	X_train = features[train_inds,:,:,:]
+	Y_train = labels[train_inds]
+	
+	val_inds = perm[int(train_val_split*N):]
+	X_val = features[val_inds,:,:,:]
+	Y_val = labels[val_inds]
+	return X_train, Y_train, X_val, Y_val
 	
 def load_dataset(dataset):
 	if dataset == "cifar10":
 		return generate_dataset_cifar10("../datasets/cifar-10-batches-py/data_batch_1")
 	elif dataset == "tiny200":
-		return load_tiny_imagenet(path="../datasets/tiny-imagenet-200/", wnids_path="", resize='False', num_classes=200, dtype=np.float32)
+		class_names, X_train, y_train, X_val, y_val = load_tiny_imagenet(path="../datasets/tiny-imagenet-200/", wnids_path="", resize='False', num_classes=200, dtype=np.float32)
+		
+		N = X_train.shape[0]
+		Y_train = np.zeros((N, 200))
+		Y_train[np.arange(N), y_train] = 1
+		
+		N = X_val.shape[0]
+		Y_val = np.zeros((N, 200))
+		Y_val[np.arange(N), y_val] = 1
+		
+		return X_train, Y_train, X_val, Y_val
 	
 def save_training_data(data, model_name):
 	if not os.path.isdir("models"):
