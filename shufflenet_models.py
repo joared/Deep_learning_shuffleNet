@@ -115,7 +115,7 @@ def default_model(model_func):
 			
 			loss = tf.losses.softmax_cross_entropy(y, y_pred)
 			loss = tf.identity(loss, name="loss")
-			beta = tf.Variable(0.01, trainable=False, name="beta")
+			beta = tf.Variable(0, trainable=False, name="beta")
 			cost = loss
 			for w in tf.trainable_variables():
 				cost += beta*tf.nn.l2_loss(w)
