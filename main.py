@@ -53,7 +53,7 @@ def test(args):
 	input()
 	quit()
 		
-def main():
+def main(args):
 	import inspect
 	import model_builds
 	import model
@@ -73,7 +73,7 @@ def main():
 	#m = model.Model("model_conv")
 	#m.load()
 
-	m.build()
+	m.build(lr=args.lr)
 	m.flops()
 	#print("m1 ops:", len(m1.sess.graph.get_operations()))
 	
@@ -83,7 +83,7 @@ def main():
 	X, Y = load_dataset("cifar10")
 	#m1.evaluate_prediction_time(X, n_predictions=100)
 	#m1.train(X[:200, :, :, :], Y[:200], batch_size=10, epochs=10, save_data=False)
-	m.train(X, Y, batch_size=100, epochs=50, save_data=True)
+	m.train(X, Y, batch_size=100, epochs=args.epochs, save_data=True)
 
 if __name__ == "__main__":
 	# conv_flops(inp_dim, inp_chan, kernel, filters, stride)
@@ -106,13 +106,13 @@ if __name__ == "__main__":
 	flops += shuffle_stage_flops(14, 400, 800, 3, g)
 	flops += 800*7*7
 	flops += 10000*800
-	print("Flops: " + str(flops))
+	#print("Flops: " + str(flops))
 	
-	main()
-	#parser = argparse.ArgumentParser()
+	
+	parser = argparse.ArgumentParser()
 	#parser.add_argument('model_name', help='mode name')
-	#parser.add_argument('--epochs', type=int, default=5, help='epochs')
-	#parser.add_argument('--lr', type=float, default=0.083, help='learning rate')
+	parser.add_argument('--epochs', type=int, default=5, help='epochs')
+	parser.add_argument('--lr', type=float, default=0.083, help='learning rate')
 	
 	#parser.add_argument('--data', default="cifar10", help='dataset')
 	#parser.add_argument('--batch', type=int, default=100, help='batch size')
@@ -123,7 +123,8 @@ if __name__ == "__main__":
 	##parser.add_argument('--eval', action='store_true')
 	
 	##parser.add_argument('--flops', action='store_true', help='print flops and exit')
-	#args = parser.parse_args()
+	args = parser.parse_args()
+	main(args)
 	#test(args)
 	
 
