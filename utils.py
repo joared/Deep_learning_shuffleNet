@@ -7,7 +7,6 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
-from shufflenet_models import Model
 from data_utils import load_tiny_imagenet
 """
 def generate_dataset_tiny_200(dir="../dataset/tiny-imagenet-200", flatten=False)
@@ -24,7 +23,20 @@ def generate_dataset_tiny_200(dir="../dataset/tiny-imagenet-200", flatten=False)
 		im_path = ""
 """
 
-def generate_dataset_cifar10(file_name, train_val_split=0.9, flatten=False):
+def train_val_data_split(X, Y, train_val_split):
+	"""Split training data into training and validation
+	"""
+	N = X.shape[0]
+	perm = np.random.permutation(N)
+	train_inds = perm[0:int(train_val_split*N)]
+	X = X[train_inds,:,:,:]
+	Y = Y[train_inds]
+	val_inds = perm[int(train_val_split*N):]
+	X_val = X[val_inds,:,:,:]
+	Y_val = Y[val_inds]
+	return X, Y, X_val, Y_val
+
+def generate_dataset_cifar10(file_name, flatten=False):
 	with open(file_name, 'rb') as fo:
 		#dict = pickle.load(fo, encoding="latin1")
 		dict = pickle.load(fo, encoding="latin1")
@@ -37,17 +49,7 @@ def generate_dataset_cifar10(file_name, train_val_split=0.9, flatten=False):
 	labels = np.zeros((10000, 10))
 	labels[np.arange(10000), labels_val] = 1
 	
-	N = features.shape[0]
-	perm = np.random.permutation(N)
-
-	train_inds = perm[0:int(train_val_split*N)]
-	X_train = features[train_inds,:,:,:]
-	Y_train = labels[train_inds]
-	
-	val_inds = perm[int(train_val_split*N):]
-	X_val = features[val_inds,:,:,:]
-	Y_val = labels[val_inds]
-	return X_train, Y_train, X_val, Y_val
+	return features, labels
 	
 def load_dataset(dataset):
 	if dataset == "cifar10":
@@ -64,6 +66,12 @@ def load_dataset(dataset):
 		Y_val[np.arange(N), y_val] = 1
 		
 		return X_train, Y_train, X_val, Y_val
+
+def load_training_data(model_name):
+	path = os.path.join("models", model_name, "training_data.txt")
+	with open(path, "rb") as f:
+		data = pickle.load(f)
+	return data
 	
 def save_training_data(data, model_name):
 	if not os.path.isdir("models"):
@@ -73,27 +81,20 @@ def save_training_data(data, model_name):
 	path = os.path.join("models", model_name + "/training_data.txt")
 	with open(path, "wb") as f:
 		pickle.dump(data, f)
-
-def load_training_data(model_name):
-	path = os.path.join("models", model_name, "training_data.txt")
-	with open(path, "rb") as f:
-		data = pickle.load(f)
-	return data
 	
-def plot_training_data(losses, accs, model_name=None):
-	rows = 1 # len(model_names)
-	cols = 2
+def plot_training_data(losses, costs, accs, model_name=None):
+	rows = 1
+	cols = 3
 	plt.subplot(rows, cols, 1)
-	plt.plot(losses["train"], label=model_name)
-	#plt.plot(losses["train"], label=model_name)
-	#plt.plot(losses["validation"], label=model_name)
+	plt.plot(losses["train"])
+	plt.plot(losses["validation"])
 	plt.ylabel("loss")
 	plt.xlabel("epoch")
 	#plt.subplot(rows, cols, 2)
-	#plt.plot(accs["train"], label=model_name)
-	#plt.plot(accs["validation"], label=model_name)
-	#plt.ylabel("accuracy")
-	#plt.xlabel("epoch")
+	#plt.plot(accs["train"])
+	#plt.plot(accs["validation"])
+	plt.ylabel("accuracy")
+	plt.xlabel("epoch")
 	plt.show()
 		
 def analyze_model(model):
