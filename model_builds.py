@@ -142,6 +142,13 @@ def conv_cifar10_v1(input_image):
 	#h = tf.layers.dense(h, 10, activation="relu")#, activation = "relu")
 	return h
 
+# Jack
+@cifar10_model
+def conv_cifar10_jack(input_image):
+	
+	return 0
+
+
 if __name__ == "__main__":
 	tf.logging.set_verbosity(tf.logging.ERROR)
 	#import model
