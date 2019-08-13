@@ -146,9 +146,10 @@ def conv_cifar10_v1(input_image):
 @cifar10_model
 def conv_cifar10_jack(input_image):
 	shuffle_group = 3
-	l = shufflenet_stage("stage_1", l=input_image, out_channel=channels[shuffle_group][0], repeat=2, group=shuffle_group)
-	l = shufflenet_stage("stage_2", l=l, out_channel=channels[shuffle_group][1], repeat=4, group=shuffle_group)
-	l = shufflenet_stage("stage_3", l=l, out_channel=channels[shuffle_group][2], repeat=2, group=shuffle_group)
+	# 100%, 50 epochs
+	l = shufflenet_stage("stage_1", l=input_image, out_channel=120, repeat=2, group=shuffle_group)
+	l = shufflenet_stage("stage_2", l=l, out_channel=240, repeat=4, group=shuffle_group)
+	l = shufflenet_stage("stage_3", l=l, out_channel=480, repeat=2, group=shuffle_group)
 
 	l = tf.layers.flatten(l)
 	l = tf.layers.dense(l, 10)
