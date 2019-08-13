@@ -28,13 +28,6 @@ channels = {1:[144, 288, 576],
 			8:[384, 768, 1536]}
 
 @model_wrapper(inp_shape=(None,224,224,3), out_shape=(None,1000))
-def shuffle_unit(inp):
-	l = tf.layers.conv2d(inp, 24, 3, strides=2, padding="same")
-	l = bn_relu(l)
-	l = shuffle_unit("shuffle", l, out_channel, 4, 1, shuffle=True)
-	return l
-
-@model_wrapper(inp_shape=(None,224,224,3), out_shape=(None,1000))
 def shufflenet_cifar10_original(input_image):
 	"""
 	l = Conv2D('conv1', image, first_chan, 3, strides=2, activation=BNReLU)
@@ -114,20 +107,26 @@ def shufflenet_cifar10_x0_25(input_image):
 
 @cifar10_model
 def shufflenet_cifar10_v1(input_image):
+	# FLOPS: 12.9M
+	# learning rate: 0.0
+	
 	group = 3
 	shuffle = True
-	l = tf.layers.conv2d(input_image, 24, 3, strides=2, padding="same")
-	l = bn_relu(l)
-	
-	l = shufflenet_stage("stage_1", l, channels[group][0], 3, group, shuffle)
+	#l = tf.layers.conv2d(input_image, 24, 3, strides=2, padding="same")
+	l = input_image
+	l = shufflenet_stage("stage_1", l, 180, 3, group, shuffle)
+	#l = shufflenet_stage("stage_2", l, channels[group][0], 3, group, shuffle)
+	#shufflenet_unit("u1", l, out_channel=channels[group][0], group=group, strides=1, shuffle=True):
+	#shufflenet_unit("u2", l, out_channel=channels[group][0], group=group, strides=1, shuffle=True):
+	#shufflenet_unit("u3", l, out_channel=channels[group][0], group=group, strides=1, shuffle=True):
 	
 	l = tf.layers.flatten(l)
-	l = tf.layers.dense(l, 10, use_bias=True)
+	l = tf.layers.dense(l, 10)
 	return l
 	
 @cifar10_model
 def conv_cifar10_v1(input_image):
-	x_norm = tf.image.per_image_standardization(input_image)
+	# FLOPS: 1 468 416
 	conv2d_1 = tf.layers.conv2d(input_image, 24, (3,3), strides=2, padding="same")
 	conv2d_1 = tf.layers.batch_normalization(conv2d_1)
 	conv2d_1 = tf.nn.relu(conv2d_1)
