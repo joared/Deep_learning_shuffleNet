@@ -70,6 +70,7 @@ class Model(object):
 			x = tf.placeholder(tf.float32, shape=self.inp_shape, name="x")
 			y = tf.placeholder(tf.float32, shape=self.out_shape, name="y")
 			pre_process = tf.image.per_image_standardization(x)
+			#pre_process = tf.map_fn(lambda frame: tf.image.per_image_standardization(frame), x)
 			pre_process = tf.identity(pre_process, name="pre_process")
 			
 			# build hidden layers by calling model_func
@@ -146,6 +147,8 @@ class Model(object):
 		if validation_data:
 			X_val, Y_val = validation_data
 		elif train_val_split:
+			print("HHHHHHHHHHHHHHHHOASHOUJAIOJFIOAFOISJFOAI")
+			input()
 			X, Y, X_val, Y_val = utils.train_val_data_split(X, Y, train_val_split)
 		else:
 			X_val, Y_val = None, None
@@ -154,7 +157,7 @@ class Model(object):
 			# make pre processing a part of loading the batches instead
 			print("preprocessing images...")
 			X = self.sess.run(self.pre_process, {self.x: X})
-			if X_val: X_val = self.sess.run(self.pre_process, {self.x: X_val})
+			if len(X_val) > 0: X_val = self.sess.run(self.pre_process, {self.x: X_val})
 			print("...preprocessing done!")
 			
 			# record training data
@@ -208,11 +211,15 @@ class Model(object):
 				print("train cost:", np.mean(train_costs[-1]))
 				print("train acc:", np.mean(train_accs[-1]))
 				
-				if epoch % validation_freq == 0 and X_val and Y_val:
+				if epoch % validation_freq == 0 and len(X_val) > 0 and len(Y_val) > 0:
 					# perform validation every validation_freq epoch
 					print("Validating...")
-					val_y_pred, val_loss, val_cost = self.sess.run([self.y_pred, self.loss, self.cost], feed_dict = {self.x: X_val, self.y: Y_val})
-					val_acc = self.compute_accuracy(val_y_pred, Y_val)
+					val_y_pred, val_loss, val_cost, val_acc = self.sess.run([self.y_pred, 
+																			self.loss, 
+																			self.cost, 
+																			self.accuracy], 
+																			feed_dict = {self.x: X_val, self.y: Y_val})
+					#val_acc = self.compute_accuracy(val_y_pred, Y_val)
 					losses["validation"].append(val_loss)
 					accs["validation"].append(val_acc)
 					print("val loss:", val_loss.mean)
