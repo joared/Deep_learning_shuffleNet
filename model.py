@@ -157,7 +157,7 @@ class Model(object):
 			# make pre processing a part of loading the batches instead
 			print("preprocessing images...")
 			X = self.sess.run(self.pre_process, {self.x: X})
-			if len(X_val) > 0: X_val = self.sess.run(self.pre_process, {self.x: X_val})
+			if X_val is not None: X_val = self.sess.run(self.pre_process, {self.x: X_val})
 			print("...preprocessing done!")
 			
 			# record training data
@@ -211,7 +211,7 @@ class Model(object):
 				print("train cost:", np.mean(train_costs[-1]))
 				print("train acc:", np.mean(train_accs[-1]))
 				
-				if epoch % validation_freq == 0 and len(X_val) > 0 and len(Y_val) > 0:
+				if epoch % validation_freq == 0 and X_val is not None and Y_val is not None:
 					# perform validation every validation_freq epoch
 					print("Validating...")
 					val_y_pred, val_loss, val_cost, val_acc = self.sess.run([self.y_pred, 
@@ -222,8 +222,10 @@ class Model(object):
 					#val_acc = self.compute_accuracy(val_y_pred, Y_val)
 					losses["validation"].append(val_loss)
 					accs["validation"].append(val_acc)
-					print("val loss:", val_loss.mean)
-					print("val cost:", val_cost.mean)
+					print("val loss:", val_loss.mean())
+					print(val_loss)
+					print("val cost:", val_cost.mean())
+					print(val_cost)
 					print("val acc:", val_acc)
 				
 				# linear learning rate decay
