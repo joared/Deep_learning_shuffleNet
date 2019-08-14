@@ -85,7 +85,7 @@ def main(args):
 	#m = model.Model("model_conv")
 	#m.load()
 
-	m.build(lr=args.lr, beta=args.beta)
+	m.build(lr=args.lr, lr_min=args.lr_min, lr_reduction_per_step=args.lr_red, beta=args.beta)
 	m.flops()
 	#print("m1 ops:", len(m1.sess.graph.get_operations()))
 	
@@ -119,7 +119,9 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	#parser.add_argument('model_name', help='mode name')
 	parser.add_argument('--epochs', type=int, default=5, help='epochs')
-	parser.add_argument('--lr', type=float, default=0.083, help='learning rate')
+	parser.add_argument('--lr', type=float, default=0.1, help='learning rate')
+	parser.add_argument('--lr_min', type=float, default=0.00001, help='learning rate minimum value')
+	parser.add_argument('--lr_red', type=float, default=0.0, help='learning rate reduction per update')
 	
 	#parser.add_argument('--data', default="cifar10", help='dataset')
 	#parser.add_argument('--batch', type=int, default=100, help='batch size')
