@@ -96,7 +96,14 @@ def main(args):
 	
 	#m.evaluate_prediction_time(X, n_predictions=100)
 	#m.train(X[:200, :, :, :], Y[:200], batch_size=10, epochs=10, save_data=False)
-	
+	weights = 0
+	for i in tf.trainable_variables():
+		p = 1
+		for j in i.shape:
+			p *= j
+		weights += p
+	print("Weights: {}".format(weights))
+	input()
 	m.train(X, Y, batch_size=100, epochs=args.epochs, train_val_split=args.data_split, save_data=True)
 
 if __name__ == "__main__":
