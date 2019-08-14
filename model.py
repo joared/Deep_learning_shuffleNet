@@ -207,6 +207,7 @@ class Model(object):
 				losses["train"].append(sum(train_losses)/len(train_losses))
 				losses["train"].append(sum(train_costs)/len(train_costs))
 				accs["train"].append(sum(train_accs)/len(train_accs))
+				
 				print("train loss:", np.mean(train_losses[-1]))
 				print("train cost:", np.mean(train_costs[-1]))
 				print("train acc:", np.mean(train_accs[-1]))
@@ -219,13 +220,10 @@ class Model(object):
 																			self.cost, 
 																			self.accuracy], 
 																			feed_dict = {self.x: X_val, self.y: Y_val})
-					#val_acc = self.compute_accuracy(val_y_pred, Y_val)
 					losses["validation"].append(val_loss)
 					accs["validation"].append(val_acc)
-					print("val loss:", val_loss.mean())
-					print(val_loss)
-					print("val cost:", val_cost.mean())
-					print(val_cost)
+					print("val loss:", val_loss)
+					print("val cost:", val_cost)
 					print("val acc:", val_acc)
 				
 				# linear learning rate decay
