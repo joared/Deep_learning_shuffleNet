@@ -29,12 +29,12 @@ def train_val_data_split(X, Y, train_val_split):
 	N = X.shape[0]
 	perm = np.random.permutation(N)
 	train_inds = perm[0:int(train_val_split*N)]
-	X = X[train_inds,:,:,:]
-	Y = Y[train_inds]
+	X_train = X[train_inds,:,:,:]
+	Y_train = Y[train_inds]
 	val_inds = perm[int(train_val_split*N):]
 	X_val = X[val_inds,:,:,:]
 	Y_val = Y[val_inds]
-	return X, Y, X_val, Y_val
+	return X_train, Y_train, X_val, Y_val
 
 def generate_dataset_cifar10(file_name, flatten=False):
 	with open(file_name, 'rb') as fo:
