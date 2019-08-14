@@ -36,24 +36,33 @@ def train_val_data_split(X, Y, train_val_split):
 	Y_val = Y[val_inds]
 	return X_train, Y_train, X_val, Y_val
 
-def generate_dataset_cifar10(file_name, flatten=False):
-	with open(file_name, 'rb') as fo:
-		#dict = pickle.load(fo, encoding="latin1")
-		dict = pickle.load(fo, encoding="latin1")
+def generate_dataset_cifar10(path, n_batches=5, flatten=False):
+	#shape = [3, 32, 32]
+	labels = np.zeros((10000*n_batches, 10))
+	features = np.zeros([10000*n_batches] + [32, 32, 3])
+	for i in range(1, n_batches+1):
+		file_name = path + "/data_batch_{}".format(i)
+		with open(file_name, 'rb') as fo:
+			#dict = pickle.load(fo, encoding="latin-1")
+			dict = pickle.load(fo, encoding="latin1")
 
-	features = dict["data"]
-	if not flatten:
-		features = features.reshape(10000, 32, 32, 3)
-	labels_val = dict["labels"]
+		features_batch = dict["data"]
+		if not flatten: 
+			features_batch = features_batch.reshape([10000] + [3, 32, 32])
+			features_batch = np.rollaxis(features_batch, 1, 4)
+			features[10000*(i-1):10000*i, :, : :] = features_batch
+		else:
+			pass
+			
+		labels_val = dict["labels"]
 
-	labels = np.zeros((10000, 10))
-	labels[np.arange(10000), labels_val] = 1
+		labels[np.arange(10000*(i-1), 10000*i), labels_val] = 1
 	
 	return features, labels
 	
 def load_dataset(dataset):
 	if dataset == "cifar10":
-		return generate_dataset_cifar10("../datasets/cifar-10-batches-py/data_batch_1")
+		return generate_dataset_cifar10("../datasets/cifar-10-batches-py")
 	elif dataset == "tiny200":
 		class_names, X_train, y_train, X_val, y_val = load_tiny_imagenet(path="../datasets/tiny-imagenet-200/", wnids_path="", resize='False', num_classes=200, dtype=np.float32)
 		
@@ -95,6 +104,14 @@ def plot_training_data(losses, costs, accs, model_name=None):
 	#plt.plot(accs["validation"])
 	plt.ylabel("accuracy")
 	plt.xlabel("epoch")
+	plt.show()
+	
+def plot_image(img):
+	print(img)
+	print(img.shape)
+	img = img.reshape(32, 32, 3)
+	img = img/255
+	plt.imshow(img, cmap="gray")
 	plt.show()
 		
 def analyze_model(model):

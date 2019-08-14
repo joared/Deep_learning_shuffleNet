@@ -9,7 +9,7 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
-from utils import load_dataset, save_training_data, load_training_data, plot_training_data
+from utils import load_dataset, save_training_data, load_training_data, plot_training_data, plot_image
 #from models import load_model
 #from model_builder import shufflenet_model_cifar10_small
 
@@ -93,8 +93,10 @@ def main(args):
 	#print("m2 ops:", len(m2.sess.graph.get_operations()))
 	
 	X, Y = load_dataset("cifar10")
+	
 	#m.evaluate_prediction_time(X, n_predictions=100)
 	#m.train(X[:200, :, :, :], Y[:200], batch_size=10, epochs=10, save_data=False)
+	
 	m.train(X, Y, batch_size=100, epochs=args.epochs, train_val_split=args.data_split, save_data=True)
 
 if __name__ == "__main__":
