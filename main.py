@@ -18,13 +18,25 @@ def conv_flops(inp_dim, inp_chan, kernel, filters, stride):
 
 def shuffle_unit_flops(inp_size, inp_chan, out_chan, group):
 	bottleneck_chan = out_chan//4
-	return pow(inp_size, 2)*(2*inp_chan*bottleneck_chan/group + 9*bottleneck_chan)
+	return pow(inp_size, 2)*bottleneck_chan*(2*inp_chan/group + 9)
 
 def shuffle_stage_flops(inp_size, inp_chan, out_chan, repeat, group):
 	s = 0
 	for i in range(repeat+1):
 		if i == 0 and inp_chan <= 24:
-			s += shuffle_unit_flops(inp_size, inp_chan, out_chan, group)
+			b_neck = out_chan//4
+			s += pow(inp_size, 2)*(inp_chan*b_neck + 1/4*b_neck*(4*b_neck-inp_chan)/group + 9/4*b_neck)
+		elif i == 0:
+			s += pow(inp_size, 2)*inp_chan*(3/2*inp_chan/group + 9/8)
+		else:
+			s += shuffle_unit_flops(inp_size, out_chan, out_chan, group)
+	return s
+
+def shuffle_stage_flops_old(inp_size, inp_chan, out_chan, repeat, group):
+	s = 0
+	for i in range(repeat+1):
+		if i == 0:
+			s += pow(inp_size, 2)*inp_chan*(3/2*inp_chan/group + 9/8)
 		else:
 			s += shuffle_unit_flops(inp_size, out_chan, out_chan, group)
 	return s
@@ -73,7 +85,7 @@ def main(args):
 	#m = model.Model("model_conv")
 	#m.load()
 
-	m.build(lr=args.lr)
+	m.build(lr=args.lr, beta=args.beta)
 	m.flops()
 	#print("m1 ops:", len(m1.sess.graph.get_operations()))
 	
@@ -81,33 +93,19 @@ def main(args):
 	#print("m2 ops:", len(m2.sess.graph.get_operations()))
 	
 	X, Y = load_dataset("cifar10")
-	#m1.evaluate_prediction_time(X, n_predictions=100)
-	#m1.train(X[:200, :, :, :], Y[:200], batch_size=10, epochs=10, save_data=False)
-	m.train(X, Y, batch_size=100, epochs=args.epochs, save_data=True)
+	#m.evaluate_prediction_time(X, n_predictions=100)
+	#m.train(X[:200, :, :, :], Y[:200], batch_size=10, epochs=10, save_data=False)
+	m.train(X, Y, batch_size=100, epochs=args.epochs, train_val_split=args.data_split, save_data=True)
 
 if __name__ == "__main__":
 	# conv_flops(inp_dim, inp_chan, kernel, filters, stride)
-	
-	# shuffle_unit_flops(inp_size, inp_chan, group, out_chan)
-	
+	# shuffle_unit_flops(inp_size, inp_chan, out_chan, group)
 	# shuffle_stage_flops(inp_size, inp_chan, out_chan, repeat, group)
 	
 	### TODO ###
 	# import pictures as train, val and test
 	# run from terminal
 	# concat training data saves
-	#test2()
-	g = 2
-	flops = 0
-	flops += conv_flops(224, 3, 3, 24, 2)
-	#flops += conv_flops(112, 3, 3, 24, 2)
-	flops += shuffle_stage_flops(56, 24, 200, 3, g)
-	flops += shuffle_stage_flops(28, 200, 400, 7, g)
-	flops += shuffle_stage_flops(14, 400, 800, 3, g)
-	flops += 800*7*7
-	flops += 10000*800
-	#print("Flops: " + str(flops))
-	
 	
 	parser = argparse.ArgumentParser()
 	#parser.add_argument('model_name', help='mode name')
@@ -117,12 +115,13 @@ if __name__ == "__main__":
 	#parser.add_argument('--data', default="cifar10", help='dataset')
 	#parser.add_argument('--batch', type=int, default=100, help='batch size')
 	#parser.add_argument('--load', help='model name')
-	#parser.add_argument('--beta', type=float, default=0, help='beta')
+	parser.add_argument('--beta', type=float, default=0.0, help='beta')
 	#parser.add_argument('--group', type=int, default=1, help='group')
 	#parser.add_argument('--shuffle', type=int, default=1, help='shuffle')
 	##parser.add_argument('--eval', action='store_true')
 	
 	##parser.add_argument('--flops', action='store_true', help='print flops and exit')
+	parser.add_argument('--data_split', type=float, default=0.0, help='train/val data split')
 	args = parser.parse_args()
 	main(args)
 	#test(args)
