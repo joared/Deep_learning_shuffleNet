@@ -57,7 +57,7 @@ def pointwise_gconv(name, l, out_channel, group, activation):
 	l = tf.concat(l_list_2, 3)
 	return activation(l)
 	
-def shufflenet_unit(name, l, out_channel, group, strides, shuffle=True):
+def shufflenet_unit(name, l, out_channel, group, strides, bottleneck_div, shuffle=True):
 	name += "_su"
 	in_shape = l.get_shape().as_list()
 	in_channel = in_shape[-1]
@@ -66,10 +66,10 @@ def shufflenet_unit(name, l, out_channel, group, strides, shuffle=True):
 	# "We do not apply group convolution on the first pointwise layer
 	#  because the number of input channels is relatively small."
 	group = group if in_channel > 24 else 1
-	l = pointwise_gconv(name + "_pw_1", l, out_channel // 4, group, bn_relu)
+	l = pointwise_gconv(name + "_pw_1", l, out_channel // bottleneck_div, group, bn_relu)
 	
 	if shuffle: l = channel_shuffle(l, group)
-	l = depthwise_conv(name, l, out_channel // 4, 3, strides=strides)
+	l = depthwise_conv(name, l, out_channel // bottleneck_div, 3, strides=strides)
 	l = tf.layers.batch_normalization(l)
 
 	# doubles outputs if strides = 1
@@ -86,10 +86,10 @@ def shufflenet_unit(name, l, out_channel, group, strides, shuffle=True):
 		#output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
 	return output
 	
-def shufflenet_stage(stage_name, l, out_channel, repeat, group, shuffle=True):
+def shufflenet_stage(stage_name, l, out_channel, repeat, group, bottleneck_div, shuffle=True):
 	for i in range(repeat+1):
 		name = '{}_block{}'.format(stage_name, i)
-		l = shufflenet_unit(name, l, out_channel, group, 2 if i == 0 else 1, shuffle)
+		l = shufflenet_unit(name, l, out_channel, group, 2 if i == 0 else 1, bottleneck_div, shuffle)
 	return l
 	
 def shufflenet_unit_v2(name, l, out_channel, group, strides, shuffle=True):

@@ -20,20 +20,20 @@ import model
 def conv_flops(inp_dim, inp_chan, kernel, filters, stride):
 	return pow(inp_dim, 2)*pow(kernel, 2)*inp_chan*filters/pow(stride, 2)
 
-def shuffle_unit_flops(inp_size, inp_chan, out_chan, group):
-	bottleneck_chan = out_chan//4
+def shuffle_unit_flops(inp_size, inp_chan, out_chan, group, bottleneck_div=4):
+	bottleneck_chan = out_chan//bottleneck_div
 	return pow(inp_size, 2)*bottleneck_chan*(2*inp_chan/group + 9)
 
-def shuffle_stage_flops(inp_size, inp_chan, out_chan, repeat, group):
+def shuffle_stage_flops(inp_size, inp_chan, out_chan, repeat, group, bottleneck_div=4):
 	s = 0
 	for i in range(repeat+1):
 		if i == 0 and inp_chan <= 24:
-			b_neck = out_chan//4
+			b_neck = out_chan//bottleneck_div
 			s += pow(inp_size, 2)*(inp_chan*b_neck + 1/4*b_neck*(4*b_neck-inp_chan)/group + 9/4*b_neck)
 		elif i == 0:
 			s += pow(inp_size, 2)*inp_chan*(3/2*inp_chan/group + 9/8)
 		else:
-			s += shuffle_unit_flops(inp_size, out_chan, out_chan, group)
+			s += shuffle_unit_flops(inp_size, out_chan, out_chan, group, bottleneck_div)
 	return s
 
 def shuffle_stage_flops_old(inp_size, inp_chan, out_chan, repeat, group):
