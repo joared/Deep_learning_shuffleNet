@@ -80,12 +80,12 @@ def save_any(file_name, data):
 	if not os.path.isdir("tests"):
 		os.mkdir("tests")
 	#path = os.path.join("models", model_name, "{}.txt".format(file_name))
-	path = os.path.join("tests", file_name)
+	path = os.path.join("tests", file_name + ".txt")
 	with open(path, "wb") as f:
 		pickle.dump(data, f)
 
 def load_any(file_name):
-	path = os.path.join("tests", file_name)
+	path = os.path.join("tests", file_name + ".txt")
 	with open(path, "rb") as f:
 		data = pickle.load(f)
 	return data
