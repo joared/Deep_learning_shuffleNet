@@ -167,12 +167,12 @@ def shufflenet_cifar10_v5(input_image):
 
 @cifar10_model
 def shufflenet_cifar10_v6(input_image):
-	# FLOPS: 1.4M
+	# FLOPS: 1.46M
 	# learning rate: 0.02
 	group = 8
 	shuffle = True
 	l = input_image
-	l = shufflenet_stage("stage_1", l, 111, 1, group, shuffle)
+	l = shufflenet_stage("stage_1", l, 112, 1, group, shuffle)
 	l = tf.layers.flatten(l)
 	l = tf.layers.dense(l, 10)
 	return l
