@@ -172,7 +172,7 @@ def shufflenet_cifar10_v6(input_image):
 	group = 8
 	shuffle = True
 	l = input_image
-	l = shufflenet_stage("stage_1", l, 98, 1, group, shuffle)
+	l = shufflenet_stage("stage_1", l, 96, 1, group, shuffle)
 	l = tf.layers.flatten(l)
 	l = tf.layers.dense(l, 10)
 	return l
