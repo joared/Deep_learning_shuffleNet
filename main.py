@@ -76,6 +76,11 @@ def eval_pred_time(args):
 	X, Y = load_dataset("cifar10")
 	pred_time = m.evaluate_prediction_time(X, args.pred_iterations)
 	
+def train_plot(args):
+	m = choose_model(args)
+	d = utils.load_training_data(m.name)
+	utils.plot_training_data(d[0], d[1], d[2])
+	
 def lr_test(args):
 	m = choose_model(args)
 	X, Y = load_dataset("cifar10")
@@ -93,7 +98,7 @@ def main(args):
 	#m.evaluate_prediction_time(X, n_predictions=100)
 	#m.train(X[:200, :, :, :], Y[:200], batch_size=10, epochs=10, save_data=False)
 	
-	choices = [train, lr_test, eval_pred_time]
+	choices = [train, lr_test, train_plot, eval_pred_time]
 	for i, c in enumerate(choices):
 		print("{}. {}".format(i+1, c.__name__))
 	choice = int(input(": "))

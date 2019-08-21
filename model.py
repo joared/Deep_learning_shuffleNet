@@ -274,7 +274,7 @@ class Model(object):
 																			self.accuracy], 
 																			feed_dict = {self.x: X_val, self.y: Y_val})
 					losses["validation"].append(val_loss)
-					costs["validation"].append(val_loss)
+					costs["validation"].append(val_cost)
 					accs["validation"].append(val_acc)
 					print("val loss:", val_loss)
 					print("val cost:", val_cost)
