@@ -9,7 +9,7 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
-from utils import load_dataset, save_training_data, load_training_data, plot_training_data, plot_image
+from utils import load_dataset, save_training_data, load_training_data, plot_training_data, plot_image, plot_exp_learning_rate
 #from models import load_model
 #from model_builder import shufflenet_model_cifar10_small
 
@@ -104,8 +104,10 @@ def main(args):
 		weights += p
 	print("Weights: {}".format(weights))
 	input()
-	m.train(X, Y, batch_size=100, epochs=args.epochs, train_val_split=args.data_split, save_data=True)
-
+	#m.train(X, Y, batch_size=100, epochs=args.epochs, train_val_split=args.data_split, save_data=True)
+	losses, learning_rates = m.exp_learning_rate(X, Y, lr_start=0.00001, lr_end=1, n_iterations=100, batch_size=100)
+	plot_exp_learning_rate(losses, learning_rates)
+	
 if __name__ == "__main__":
 	# conv_flops(inp_dim, inp_chan, kernel, filters, stride)
 	# shuffle_unit_flops(inp_size, inp_chan, out_chan, group)

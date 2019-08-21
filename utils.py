@@ -114,6 +114,13 @@ def plot_image(img):
 	plt.imshow(img, cmap="gray")
 	plt.show()
 		
+def plot_exp_learning_rate(losses, learning_rates):
+	plt.subplot(1, 2, 1)
+	plt.plot(learning_rates)
+	plt.subplot(1, 2, 2)
+	plt.plot(losses)
+	plt.show()
+		
 def analyze_model(model):
 	pass
 	"""

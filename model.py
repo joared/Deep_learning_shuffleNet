@@ -91,8 +91,10 @@ class Model(object):
 				cost += beta*tf.nn.l2_loss(w)
 			cost = tf.identity(cost, name="cost")
 			global_step = tf.Variable(0, trainable=False, name="global_step")
+			
 			learning_rate = tf.maximum(lr - tf.dtypes.cast(global_step, tf.float32)*lr_reduction_per_step, lr_min)
-			learning_rate = tf.identity(learning_rate, name="learning_rate")
+			learning_rate = tf.placeholder_with_default(learning_rate, shape=[], name="learning_rate")
+			
 			optimizer = optimizer(learning_rate)
 			optimizer = optimizer.minimize(cost, global_step, name="optimizer")
 			correct_prediction = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y, 1), name='correct_pred')
@@ -141,14 +143,59 @@ class Model(object):
 		else:
 			raise Exception("Session is closed and save is not possible...")
 
+	def exp_learning_rate(self, X, Y, lr_start, lr_end, n_iterations, batch_size=100):
+		def moving_average(a, n=3) :
+			ret = np.cumsum(a, dtype=float)
+			ret[n:] = ret[n:] - ret[:-n]
+			return ret[n - 1:] / n
+		if not self._is_built: raise Exception("Model not built yet, use load or build to build model")
+		with self.sess:
+			# make pre processing a part of loading the batches instead
+			print("preprocessing images...")
+			X = self.sess.run(self.pre_process, {self.x: X})
+			print("...preprocessing done!")
+			
+			# record training data
+			losses = []
+			learning_rates = []
+			
+			lr = lr_start
+			c = pow(lr_end/lr_start, 1/n_iterations)
+			N = X.shape[0]
+			perm = np.random.permutation(N)
+			for i in range(n_iterations):
+				batch_inds = perm[i*batch_size:batch_size*(i+1)]
+				feed_dict = {self.x: X[batch_inds], self.y: Y[batch_inds],
+							self.learning_rate: lr}
+				
+				feed_dict = {self.x: X[0:batch_size], self.y: Y[0:batch_size],
+							self.learning_rate: lr}
+				
+				# performs gradient descent and updates weights
+				_, train_loss, train_cost, train_acc = self.sess.run([self.optimizer, 
+																	self.loss, 
+																	self.cost, 
+																	self.accuracy], 
+																	feed_dict)
+
+				losses.append(train_loss)
+				print(train_loss)
+				learning_rates.append(lr)
+				lr = lr_start * pow(c, i)
+			
+				print("learning rate:", self.learning_rate.eval({self.learning_rate: lr}))
+				if train_loss > 100:
+					break
+			
+		losses = moving_average(losses, n=3)
+		return losses, learning_rates[0:len(losses)]
+
 	def train(self, X, Y, batch_size=100, epochs=1, train_val_split=0.0, validation_data=None, validation_freq=1, save_data=True):
 		#initial_epoch=0
 		if not self._is_built: raise Exception("Model not built yet, use load or build to build model")
 		if validation_data:
 			X_val, Y_val = validation_data
 		elif train_val_split:
-			print("HHHHHHHHHHHHHHHHOASHOUJAIOJFIOAFOISJFOAI")
-			input()
 			X, Y, X_val, Y_val = utils.train_val_data_split(X, Y, train_val_split)
 		else:
 			X_val, Y_val = None, None
@@ -172,9 +219,9 @@ class Model(object):
 				print("epoch", epoch, "(steps={})".format(self.global_step.eval()))
 				
 				# temporary lists of data to be saved later
-				train_losses = []
-				train_costs = []
-				train_accs = []
+				#train_losses = []
+				#train_costs = []
+				#train_accs = []
 				
 				batch_runs = int(N/batch_size)
 				for i in range(batch_runs):
@@ -189,9 +236,13 @@ class Model(object):
 																		self.cost, 
 																		self.accuracy]
 																		, feed_dict) 
-					train_losses.append(train_loss)
-					train_costs.append(train_cost)
-					train_accs.append(train_acc)
+					#train_losses.append(train_loss)
+					#train_costs.append(train_cost)
+					#train_accs.append(train_acc)
+					
+					losses["train"].append(train_loss)
+					costs["train"].append(train_cost)
+					accs["train"].append(train_acc)
 					
 					if i == 0 and epoch == 1:
 						# estimate epoch time
@@ -204,13 +255,11 @@ class Model(object):
 					#lr = exponential_lr(self.global_step.eval())
 					#print("new learning rate:", round(lr,2))
 				
-				losses["train"].append(sum(train_losses)/len(train_losses))
-				losses["train"].append(sum(train_costs)/len(train_costs))
-				accs["train"].append(sum(train_accs)/len(train_accs))
-				
-				print("train loss:", np.mean(train_losses[-1]))
-				print("train cost:", np.mean(train_costs[-1]))
-				print("train acc:", np.mean(train_accs[-1]))
+				from_ind = (epoch-1)*batch_runs
+				to_ind = epoch*batch_runs
+				print("train loss:", np.mean(losses["train"][from_ind:to_ind]))
+				print("train cost:", np.mean(costs["train"][from_ind:to_ind]))
+				print("train acc:", np.mean(accs["train"][from_ind:to_ind]))
 				
 				if epoch % validation_freq == 0 and X_val is not None and Y_val is not None:
 					# perform validation every validation_freq epoch
@@ -236,6 +285,7 @@ class Model(object):
 				self.save()
 			
 		return losses, costs, accs
+	
 
 	def evaluate(self):
 		pass
