@@ -76,6 +76,20 @@ def load_dataset(dataset):
 		
 		return X_train, Y_train, X_val, Y_val
 
+def save_any(file_name, data):
+	if not os.path.isdir("tests"):
+		os.mkdir("tests")
+	#path = os.path.join("models", model_name, "{}.txt".format(file_name))
+	path = os.path.join("tests", file_name)
+	with open(path, "wb") as f:
+		pickle.dump(data, f)
+
+def load_any(file_name):
+	path = os.path.join("tests", file_name)
+	with open(path, "rb") as f:
+		data = pickle.load(f)
+	return data
+
 def load_training_data(model_name):
 	path = os.path.join("models", model_name, "training_data.txt")
 	with open(path, "rb") as f:

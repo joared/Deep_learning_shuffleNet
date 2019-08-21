@@ -10,6 +10,10 @@ import pickle
 import matplotlib.pyplot as plt
 
 from utils import load_dataset, save_training_data, load_training_data, plot_training_data, plot_image, plot_exp_learning_rate
+import utils
+import inspect
+import model_builds
+import model
 #from models import load_model
 #from model_builder import shufflenet_model_cifar10_small
 
@@ -40,35 +44,8 @@ def shuffle_stage_flops_old(inp_size, inp_chan, out_chan, repeat, group):
 		else:
 			s += shuffle_unit_flops(inp_size, out_chan, out_chan, group)
 	return s
-
-def get_good_learning_rate(lr_start, batch_size=100):
-	model = shufflenet_model_cifar10_big("learning_rate")
-	losses, accs = train(model, epochs=4, lr=lr_start, batch_size=100, dataset="cifar10")
-	plot_training_data(losses, None)
 	
-def test(args):
-	# test to see if run if working properly
-	
-	model_name = args.model_name
-	
-	if args.load:
-		model = load_model(model_name)
-	else:
-		model = shufflenet_model_cifar10_small(model_name, args.group, bool(args.shuffle))
-	model.sess.run(model.beta.assign(args.beta))
-	
-	losses, accs = train(model, args.epochs, args.lr, args.batch)
-	print("================")
-	print("losses:", len(losses["train"]))
-	print("accs:", len(accs["train"]))
-	print("Test finnished")
-	input()
-	quit()
-		
-def main(args):
-	import inspect
-	import model_builds
-	import model
+def choose_model(args):
 	models = []
 	i = 1
 	print("Choose model: ")
@@ -81,21 +58,9 @@ def main(args):
 	choice = int(input("Choose: "))
 	m = models[choice-1]
 	tf.logging.set_verbosity(tf.logging.ERROR)
-	#import model
-	#m = model.Model("model_conv")
-	#m.load()
 
 	m.build(lr=args.lr, lr_min=args.lr_min, lr_reduction_per_step=args.lr_red, beta=args.beta)
-	m.flops()
-	#print("m1 ops:", len(m1.sess.graph.get_operations()))
-	
-	#m2.build()
-	#print("m2 ops:", len(m2.sess.graph.get_operations()))
-	
-	X, Y = load_dataset("cifar10")
-	
-	#m.evaluate_prediction_time(X, n_predictions=100)
-	#m.train(X[:200, :, :, :], Y[:200], batch_size=10, epochs=10, save_data=False)
+	#m.flops()
 	weights = 0
 	for i in tf.trainable_variables():
 		p = 1
@@ -103,10 +68,37 @@ def main(args):
 			p *= j
 		weights += p
 	print("Weights: {}".format(weights))
-	input()
-	#m.train(X, Y, batch_size=100, epochs=args.epochs, train_val_split=args.data_split, save_data=True)
-	losses, learning_rates = m.exp_learning_rate(X, Y, lr_start=0.00001, lr_end=1, n_iterations=100, batch_size=100)
+	
+	return m
+	
+def eval_pred_time(args):
+	m = choose_model(args)
+	X, Y = load_dataset("cifar10")
+	pred_time = m.evaluate_prediction_time(X, args.pred_iterations)
+	
+def lr_test(args):
+	m = choose_model(args)
+	X, Y = load_dataset("cifar10")
+	losses, learning_rates = m.exp_learning_rate(X, Y, lr_start=0.00001, lr_end=1, n_iterations=args.lr_iterations, batch_size=100)
+	lr_test = {"losses": losses, "learning rates": learning_rates}
+	utils.save_any("lr_test", lr_test)
 	plot_exp_learning_rate(losses, learning_rates)
+	
+def train(args):
+	m = choose_model(args)
+	X, Y = load_dataset("cifar10")
+	m.train(X, Y, batch_size=100, epochs=args.epochs, train_val_split=args.data_split, save_data=True)
+	
+def main(args):
+	#m.evaluate_prediction_time(X, n_predictions=100)
+	#m.train(X[:200, :, :, :], Y[:200], batch_size=10, epochs=10, save_data=False)
+	
+	choices = [train, lr_test, eval_pred_time]
+	for i, c in enumerate(choices):
+		print("{}. {}".format(i+1, c.__name__))
+	choice = int(input(": "))
+	choices[choice-1](args)
+
 	
 if __name__ == "__main__":
 	# conv_flops(inp_dim, inp_chan, kernel, filters, stride)
@@ -119,22 +111,25 @@ if __name__ == "__main__":
 	# concat training data saves
 	
 	parser = argparse.ArgumentParser()
-	#parser.add_argument('model_name', help='mode name')
+	# training variables
 	parser.add_argument('--epochs', type=int, default=5, help='epochs')
 	parser.add_argument('--lr', type=float, default=0.1, help='learning rate')
 	parser.add_argument('--lr_min', type=float, default=0.00001, help='learning rate minimum value')
 	parser.add_argument('--lr_red', type=float, default=0.0, help='learning rate reduction per update')
+	parser.add_argument('--beta', type=float, default=0.0, help='beta')
+	parser.add_argument('--data_split', type=float, default=0.0, help='train/val data split')
+	
+	# test variables
+	parser.add_argument('--lr_iterations', type=int, default=1000, help='lr test iterations')
+	parser.add_argument('--pred_iterations', type=int, default=10000, help='prediction time iterations')
 	
 	#parser.add_argument('--data', default="cifar10", help='dataset')
 	#parser.add_argument('--batch', type=int, default=100, help='batch size')
 	#parser.add_argument('--load', help='model name')
-	parser.add_argument('--beta', type=float, default=0.0, help='beta')
-	#parser.add_argument('--group', type=int, default=1, help='group')
 	#parser.add_argument('--shuffle', type=int, default=1, help='shuffle')
 	##parser.add_argument('--eval', action='store_true')
-	
 	##parser.add_argument('--flops', action='store_true', help='print flops and exit')
-	parser.add_argument('--data_split', type=float, default=0.0, help='train/val data split')
+	
 	args = parser.parse_args()
 	main(args)
 	#test(args)

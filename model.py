@@ -150,6 +150,7 @@ class Model(object):
 			return ret[n - 1:] / n
 		if not self._is_built: raise Exception("Model not built yet, use load or build to build model")
 		with self.sess:
+			
 			# make pre processing a part of loading the batches instead
 			print("preprocessing images...")
 			X = self.sess.run(self.pre_process, {self.x: X})
@@ -160,10 +161,13 @@ class Model(object):
 			learning_rates = []
 			
 			lr = lr_start
-			c = pow(lr_end/lr_start, 1/n_iterations)
+			c = pow(lr_end/lr_start, 1/n_iterations) # constant for increasing learning rate
 			N = X.shape[0]
 			perm = np.random.permutation(N)
 			for i in range(n_iterations):
+				
+				#self.sess.run(tf.global_variables_initializer()) # trying remove if not working
+				
 				batch_inds = perm[i*batch_size:batch_size*(i+1)]
 				feed_dict = {self.x: X[batch_inds], self.y: Y[batch_inds],
 							self.learning_rate: lr}
@@ -303,8 +307,6 @@ class Model(object):
 		average_pred_time *= 1000
 		print("Average prediction time (ms):", average_pred_time)
 		return average_pred_time
-		
-	
 		
 def cifar10_model(model_func):
 	inp_shape=(None,32,32,3)
