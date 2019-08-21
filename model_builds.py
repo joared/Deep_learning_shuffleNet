@@ -177,6 +177,7 @@ def shufflenet_cifar10_v6(input_image):
 	l = tf.layers.dense(l, 10)
 	return l
 
+@cifar10_model
 def shufflenet_cifar10_v7(input_image):
 	# FLOPS: 1.36M
 	# learning rate: 0.02
