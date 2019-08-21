@@ -57,7 +57,7 @@ def pointwise_gconv(name, l, out_channel, group, activation):
 	l = tf.concat(l_list_2, 3)
 	return activation(l)
 	
-def shufflenet_unit(name, l, out_channel, group, strides, bottleneck_div, shuffle=True):
+def shufflenet_unit(name, l, out_channel, group, strides, bottleneck_div=4, shuffle=True):
 	name += "_su"
 	in_shape = l.get_shape().as_list()
 	in_channel = in_shape[-1]
@@ -86,7 +86,7 @@ def shufflenet_unit(name, l, out_channel, group, strides, bottleneck_div, shuffl
 		#output = tf.nn.relu(tf.concat([shortcut, l], axis=3))
 	return output
 	
-def shufflenet_stage(stage_name, l, out_channel, repeat, group, bottleneck_div, shuffle=True):
+def shufflenet_stage(stage_name, l, out_channel, repeat, group, bottleneck_div=4, shuffle=True):
 	for i in range(repeat+1):
 		name = '{}_block{}'.format(stage_name, i)
 		l = shufflenet_unit(name, l, out_channel, group, 2 if i == 0 else 1, bottleneck_div, shuffle)
