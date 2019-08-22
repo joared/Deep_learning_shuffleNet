@@ -226,6 +226,19 @@ def shufflenet_cifar10_v10(input_image):
 	return l
 
 @cifar10_model
+def conv_cifar10_v11(input_image):
+	# FLOPS: 1.41M
+	conv2d_1 = tf.layers.conv2d(input_image, 24, (3,3), strides=2, padding="same")
+	conv2d_1 = tf.layers.batch_normalization(conv2d_1)
+	conv2d_1 = tf.nn.relu(conv2d_1)
+	
+	l = shufflenet_stage("stage_1", conv2d_1, 128, 2, group=8, shuffle=True)
+	l = tf.layers.flatten(l)
+	l = tf.layers.dense(l, 10)
+	
+	return l
+
+@cifar10_model
 def conv_cifar10_v1(input_image):
 	# FLOPS: 1 468 416
 	conv2d_1 = tf.layers.conv2d(input_image, 24, (3,3), strides=2, padding="same")
