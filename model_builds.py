@@ -82,15 +82,15 @@ def shufflenet_cifar10_x0_25(input_image):
 	l = GlobalAvgPooling('gap', l)
 	logits = FullyConnected('linear', l, 1000)
 	"""
-	group = 3
+	group = 8
 	channel_scale = 0.25
 	
 	l = tf.layers.conv2d(input_image, int(24), 3, strides=1, padding="same")
 	l = bn_relu(l)
 	
-	l = tf.nn.max_pool(l, [1,3,3,1], [1,2,2,1], padding="SAME")
+	#l = tf.nn.max_pool(l, [1,3,3,1], [1,2,2,1], padding="SAME")
 
-	l = shufflenet_stage("stage_1", l, int(channel_scale*channels[group][0]), 3, group)
+	#l = shufflenet_stage("stage_1", l, int(channel_scale*channels[group][0]), 3, group)
 	l = shufflenet_stage("stage_2", l, int(channel_scale*channels[group][1]), 7, group)
 	l = shufflenet_stage("stage_3", l, int(channel_scale*channels[group][2]), 3, group)
 	
@@ -265,6 +265,28 @@ def shufflenet_cifar10_v13(input_image):
 	l = tf.layers.flatten(l)
 	l = tf.layers.dense(l, 10)
 	
+	return l
+
+@cifar10_model
+def shufflenet_cifar10_v14(input_image):
+	
+	group = 8
+	
+	l = tf.layers.conv2d(input_image, int(24), 3, strides=2, padding="same")
+	l = bn_relu(l)
+	
+	l = shufflenet_stage("stage_1", l, 96, 3, group)
+	l = shufflenet_stage("stage_2", l, 192, 2, group)
+	
+	# global avg pooling with relu
+	print(l.shape)
+	l = tf.reduce_mean(l, [1,2])
+	print(l.shape)
+	l = tf.nn.relu(l)
+	
+	l = tf.layers.flatten(l)
+	#l = tf.layers.dense(l, 50, activation="relu")
+	l = tf.layers.dense(l, 10, use_bias=True)
 	return l
 
 @cifar10_model

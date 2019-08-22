@@ -125,7 +125,7 @@ if __name__ == "__main__":
 	parser.add_argument('--data_split', type=float, default=0.0, help='train/val data split')
 	
 	# test variables
-	parser.add_argument('--lr_iterations', type=int, default=1000, help='lr test iterations')
+	parser.add_argument('--lr_iterations', type=int, default=100, help='lr test iterations')
 	parser.add_argument('--pred_iterations', type=int, default=10000, help='prediction time iterations')
 	
 	#parser.add_argument('--data', default="cifar10", help='dataset')
