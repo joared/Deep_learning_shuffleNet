@@ -202,6 +202,18 @@ def shufflenet_cifar10_v8(input_image):
 	return l
 
 @cifar10_model
+def shufflenet_cifar10_v9(input_image):
+	# FLOPS: 1.55M
+	# learning rate: 0.02
+	group = 8
+	shuffle = True
+	l = input_image
+	l = shufflenet_stage("stage_1", l, 128, 1, group, shuffle)
+	l = tf.layers.flatten(l)
+	l = tf.layers.dense(l, 10)
+	return l
+
+@cifar10_model
 def conv_cifar10_v1(input_image):
 	# FLOPS: 1 468 416
 	conv2d_1 = tf.layers.conv2d(input_image, 24, (3,3), strides=2, padding="same")

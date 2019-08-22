@@ -66,6 +66,7 @@ def shufflenet_unit(name, l, out_channel, group, strides, bottleneck_div=4, shuf
 	# "We do not apply group convolution on the first pointwise layer
 	#  because the number of input channels is relatively small."
 	group = group if in_channel > 24 else 1
+	print("'{}' - Groups: {}".format(name, group)) ### ta bort
 	l = pointwise_gconv(name + "_pw_1", l, out_channel // bottleneck_div, group, bn_relu)
 	
 	if shuffle: l = channel_shuffle(l, group)
