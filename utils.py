@@ -22,7 +22,11 @@ def generate_dataset_tiny_200(dir="../dataset/tiny-imagenet-200", flatten=False)
 	with open(wnids, "r") as f:
 		im_path = ""
 """
-
+def moving_average(a, n=3) :
+	ret = np.cumsum(a, dtype=float)
+	ret[n:] = ret[n:] - ret[:-n]
+	return ret[n - 1:] / n
+			
 def train_val_data_split(X, Y, train_val_split):
 	"""Split training data into training and validation
 	"""
@@ -108,18 +112,43 @@ def save_training_data(data, model_name):
 def plot_training_data(losses, costs, accs, model_name=None):
 	rows = 1
 	cols = 3
+	n = 450
+	#losses["train"] = moving_average(losses["train"], n=44950)
+	#costs["train"] = moving_average(costs["train"], n=44950)
+	#accs["train"] = moving_average(accs["train"], n=44950)
+	
+	epochs = 50
+	N = 45000
+	batch_size = 100
+	batch_runs = int(N/batch_size)
+	l_train = [0]*epochs
+	c_train = [0]*epochs
+	a_train = [0]*epochs
+	for epoch in range(1, epochs+1):
+		from_ind = (epoch-1)*batch_runs
+		to_ind = epoch*batch_runs
+		#print("from {} to {}".format(from_ind, to_ind))
+		#print(np.mean(losses["train"][from_ind:to_ind]))
+		l_train[epoch-1] = np.mean(losses["train"][from_ind:to_ind])
+		c_train[epoch-1] = np.mean(costs["train"][from_ind:to_ind])
+		a_train[epoch-1] = np.mean(accs["train"][from_ind:to_ind])
+	
+	losses["train"] = l_train
+	costs["train"] = c_train
+	accs["train"] = a_train
+	
 	plt.subplot(rows, cols, 1)
-	#plt.plot(losses["train"])
+	plt.plot(losses["train"])
 	plt.plot(losses["validation"])
 	plt.ylabel("loss")
 	plt.xlabel("epoch")
 	plt.subplot(rows, cols, 2)
-	#plt.plot(costs["train"])
+	plt.plot(costs["train"])
 	plt.plot(costs["validation"])
 	plt.ylabel("cost")
 	plt.xlabel("epoch")
 	plt.subplot(rows, cols, 3)
-	#plt.plot(accs["train"])
+	plt.plot(accs["train"])
 	plt.plot(accs["validation"])
 	plt.ylabel("accuracy")
 	plt.xlabel("epoch")

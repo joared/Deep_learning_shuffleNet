@@ -144,10 +144,7 @@ class Model(object):
 			raise Exception("Session is closed and save is not possible...")
 
 	def exp_learning_rate(self, X, Y, lr_start, lr_end, n_iterations, batch_size=100):
-		def moving_average(a, n=3) :
-			ret = np.cumsum(a, dtype=float)
-			ret[n:] = ret[n:] - ret[:-n]
-			return ret[n - 1:] / n
+
 		if not self._is_built: raise Exception("Model not built yet, use load or build to build model")
 		with self.sess:
 			
@@ -191,7 +188,7 @@ class Model(object):
 				if train_loss > 100:
 					break
 			
-		losses = moving_average(losses, n=3)
+		losses = utils.moving_average(losses, n=3)
 		return losses, learning_rates[0:len(losses)]
 
 	def train(self, X, Y, batch_size=100, epochs=1, train_val_split=0.0, validation_data=None, validation_freq=1, save_data=True):
