@@ -85,7 +85,7 @@ def shufflenet_cifar10_x0_25(input_image):
 	group = 3
 	channel_scale = 0.25
 	
-	l = tf.layers.conv2d(input_image, int(channel_scale*24), 3, strides=1, padding="same")
+	l = tf.layers.conv2d(input_image, int(24), 3, strides=1, padding="same")
 	l = bn_relu(l)
 	
 	l = tf.nn.max_pool(l, [1,3,3,1], [1,2,2,1], padding="SAME")
@@ -240,12 +240,28 @@ def shufflenet_cifar10_v11(input_image):
 
 @cifar10_model
 def shufflenet_cifar10_v12(input_image):
-	# FLOPS: 1.41M
+	# FLOPS: 1.39M
 	conv2d_1 = tf.layers.conv2d(input_image, 24, (3,3), strides=2, padding="same")
 	conv2d_1 = tf.layers.batch_normalization(conv2d_1)
 	conv2d_1 = tf.nn.relu(conv2d_1)
 	
 	l = shufflenet_stage("stage_1", conv2d_1, 160, 1, group=8, shuffle=True)
+
+	l = tf.layers.flatten(l)
+	l = tf.layers.dense(l, 10)
+	
+	return l
+
+@cifar10_model
+def shufflenet_cifar10_v13(input_image):
+	# FLOPS: 1.33M
+	l = tf.layers.conv2d(input_image, 24, (3,3), strides=2, padding="same")
+	l = tf.layers.batch_normalization(conv2d_1)
+	l = tf.nn.relu(conv2d_1)
+	
+	l = shufflenet_stage("stage_1", l, 96, 1, group=8, shuffle=True)
+	l = shufflenet_stage("stage_2", l, 192, 1, group=8, shuffle=True)
+
 	l = tf.layers.flatten(l)
 	l = tf.layers.dense(l, 10)
 	
