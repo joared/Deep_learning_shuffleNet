@@ -313,6 +313,29 @@ def shufflenet_cifar10_v15(input_image):
 	return l
 
 @cifar10_model
+def test_c1(input_image):
+	# FLOPS: 1.42M
+	group = 3
+	shuffle = True
+	c_scale = 0.25
+	l = tf.layers.conv2d(input_image, int(24), 3, strides=2, padding="same")
+	l = bn_relu(l)
+	
+	l = shufflenet_stage("stage_1", l, channels[group][0]*c_scale, 7, group, shuffle=shuffle)
+	l = shufflenet_stage("stage_2", l, channels[group][1]*c_scale, 3, group, shuffle=shuffle)
+	
+	# global avg pooling with relu
+	print(l.shape)
+	l = tf.reduce_mean(l, [1,2])
+	print(l.shape)
+	l = tf.nn.relu(l)
+	
+	l = tf.layers.flatten(l)
+	#l = tf.layers.dense(l, 50, activation="relu")
+	l = tf.layers.dense(l, 10, use_bias=True)
+	return l
+
+@cifar10_model
 def conv_cifar10_v1(input_image):
 	# FLOPS: 1 468 416
 	conv2d_1 = tf.layers.conv2d(input_image, 24, (3,3), strides=2, padding="same")
