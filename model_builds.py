@@ -297,8 +297,8 @@ def shufflenet_cifar10_v15(input_image):
 	l = tf.layers.conv2d(input_image, int(24), 3, strides=2, padding="same")
 	l = bn_relu(l)
 	
-	l = shufflenet_stage("stage_1", l, 384, 3, group, shuffle)
-	l = shufflenet_stage("stage_2", l, 384*2, 2, group, shuffle)
+	l = shufflenet_stage("stage_1", l, 384, 3, group, shuffle=shuffle)
+	l = shufflenet_stage("stage_2", l, 384*2, 2, group, shuffle=shuffle)
 	
 	# global avg pooling with relu
 	print(l.shape)
