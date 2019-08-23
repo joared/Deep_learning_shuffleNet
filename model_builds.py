@@ -293,7 +293,7 @@ def shufflenet_cifar10_v14(input_image):
 def shufflenet_cifar10_v15(input_image):
 	# FLOPS: 1.42M
 	group = 8
-	shuffle = False
+	shuffle = True
 	l = tf.layers.conv2d(input_image, int(24), 3, strides=2, padding="same")
 	l = bn_relu(l)
 	
