@@ -231,16 +231,13 @@ class Model(object):
 					batch_inds = perm[i*batch_size:batch_size*(i+1)]
 					feed_dict = {self.x: X[batch_inds], self.y: Y[batch_inds]}
 
-					# performs gradient descent and updates weights
-					#_, train_loss, train_cost, train_acc = self.sess.run([self.optimizer, 
-					#													self.loss, 
-					#													self.cost, 
-					#													self.accuracy]
-					#													, feed_dict) 
-					# performs gradient descent and updates weights
-					_ = self.sess.run([self.optimizer]
-										, feed_dict)
-					train_loss, train_cost, train_acc = 0,0,0
+					 performs gradient descent and updates weights
+					_, train_loss, train_cost, train_acc = self.sess.run([self.optimizer, 
+																		self.loss, 
+																		self.cost, 
+																		self.accuracy]
+																		, feed_dict) 
+
 					#train_losses.append(train_loss)
 					#train_costs.append(train_cost)
 					#train_accs.append(train_acc)
@@ -296,7 +293,7 @@ class Model(object):
 	def evaluate(self):
 		pass
 			
-	def evaluate_prediction_time(self, X, n_predictions=10000):
+	def evaluate_prediction_time(self, X, n_predictions=1000):
 		print("Evaluating average prediction time with {} predictions".format(n_predictions))
 		assert self._is_built, "Model not built and can not be evaluated"
 		t_start = time.time()

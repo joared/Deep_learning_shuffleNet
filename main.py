@@ -118,7 +118,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	# training variables
 	parser.add_argument('--epochs', type=int, default=5, help='epochs')
-	parser.add_argument('--val_freq', type=int, default=5, help='validation frequency')
+	parser.add_argument('--val_freq', type=int, default=1, help='validation frequency')
 	parser.add_argument('--lr', type=float, default=0.1, help='learning rate')
 	parser.add_argument('--lr_min', type=float, default=0.00001, help='learning rate minimum value')
 	parser.add_argument('--lr_red', type=float, default=0.0, help='learning rate reduction per update')

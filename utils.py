@@ -117,7 +117,7 @@ def plot_training_data(losses, costs, accs, model_name=None):
 	#costs["train"] = moving_average(costs["train"], n=44950)
 	#accs["train"] = moving_average(accs["train"], n=44950)
 	
-	epochs = 50
+	epochs = 100
 	N = 45000
 	batch_size = 100
 	batch_runs = int(N/batch_size)
