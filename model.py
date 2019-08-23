@@ -231,7 +231,7 @@ class Model(object):
 					batch_inds = perm[i*batch_size:batch_size*(i+1)]
 					feed_dict = {self.x: X[batch_inds], self.y: Y[batch_inds]}
 
-					 performs gradient descent and updates weights
+					# performs gradient descent and updates weights
 					_, train_loss, train_cost, train_acc = self.sess.run([self.optimizer, 
 																		self.loss, 
 																		self.cost, 
