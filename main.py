@@ -123,7 +123,7 @@ if __name__ == "__main__":
 	c_scale = 1
 	print(channels[g][0])
 	print(channels[g][1])
-	flops = conv_flops(32, 3, 3, 24, 2)
+	flops = conv_flops(32, 3, 3, 24, 1)
 	flops += shuffle_stage_flops(16, 24, channels[g][0]*c_scale, 3, g, 4)
 	flops += shuffle_stage_flops(8, channels[g][0]*c_scale, channels[g][1]*c_scale, 2, g, 4)
 	flops += channels[g][1]*c_scale*10 + 16*channels[g][1]*c_scale
