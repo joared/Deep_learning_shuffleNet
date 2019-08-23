@@ -269,7 +269,7 @@ def shufflenet_cifar10_v13(input_image):
 
 @cifar10_model
 def shufflenet_cifar10_v14(input_image):
-	
+	# FLOPS: 1.42M
 	group = 8
 	
 	l = tf.layers.conv2d(input_image, int(24), 3, strides=2, padding="same")
@@ -301,6 +301,31 @@ def conv_cifar10_v1(input_image):
 	conv2d_2 = tf.nn.relu(conv2d_2)
 	
 	h = tf.layers.flatten(conv2d_2)
+	#h = tf.layers.dense(h, 10, activation="relu")#, activation = "relu")
+	h = tf.layers.dense(h, 10)#, activation = "relu")
+	#h = tf.layers.dense(h, 10, activation="relu")#, activation = "relu")
+	return h
+
+@cifar10_model
+def conv_cifar10_v2(input_image):
+	# FLOPS: 1 468 416
+	l = tf.layers.conv2d(input_image, 24, (3,3), strides=1, padding="same")
+	l = tf.layers.batch_normalization(l)
+	l = tf.nn.relu(l)
+	l = tf.layers.conv2d(input_image, 24, (3,3), strides=1, padding="same")
+	l = tf.layers.batch_normalization(l)
+	l = tf.nn.relu(l)
+	l = tf.nn.max_pool(l, [1,3,3,1], [1,2,2,1], padding="SAME")
+	
+	l = tf.layers.conv2d(l, 48, (3,3), strides=1, padding="same")
+	l = tf.layers.batch_normalization(l)
+	l = tf.nn.relu(l)
+	l = tf.layers.conv2d(l, 48, (3,3), strides=1, padding="same")
+	l = tf.layers.batch_normalization(l)
+	l = tf.nn.relu(l)
+	l = tf.nn.max_pool(l, [1,3,3,1], [1,2,2,1], padding="SAME")
+	
+	h = tf.layers.flatten(l)
 	#h = tf.layers.dense(h, 10, activation="relu")#, activation = "relu")
 	h = tf.layers.dense(h, 10)#, activation = "relu")
 	#h = tf.layers.dense(h, 10, activation="relu")#, activation = "relu")
