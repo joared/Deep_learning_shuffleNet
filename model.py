@@ -232,11 +232,15 @@ class Model(object):
 					feed_dict = {self.x: X[batch_inds], self.y: Y[batch_inds]}
 
 					# performs gradient descent and updates weights
-					_, train_loss, train_cost, train_acc = self.sess.run([self.optimizer, 
-																		self.loss, 
-																		self.cost, 
-																		self.accuracy]
-																		, feed_dict) 
+					#_, train_loss, train_cost, train_acc = self.sess.run([self.optimizer, 
+					#													self.loss, 
+					#													self.cost, 
+					#													self.accuracy]
+					#													, feed_dict) 
+					# performs gradient descent and updates weights
+					_ = self.sess.run([self.optimizer]
+										, feed_dict)
+					train_loss, train_cost, train_acc = 0,0,0
 					#train_losses.append(train_loss)
 					#train_costs.append(train_cost)
 					#train_accs.append(train_acc)
