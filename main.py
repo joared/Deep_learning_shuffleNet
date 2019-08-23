@@ -119,8 +119,8 @@ if __name__ == "__main__":
 			4:[272, 544, 1088],
 			8:[384, 768, 1536]}
 			
-	g = 8
-	c_scale = 1
+	g = 3
+	c_scale = 0.25
 	print(channels[g][0])
 	print(channels[g][1])
 	flops = conv_flops(32, 3, 3, 24, 1)
