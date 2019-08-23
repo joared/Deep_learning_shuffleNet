@@ -92,7 +92,7 @@ def lr_test(args):
 def train(args):
 	m = choose_model(args)
 	X, Y = load_dataset("cifar10")
-	m.train(X, Y, batch_size=100, epochs=args.epochs, train_val_split=args.data_split, save_data=True)
+	m.train(X, Y, batch_size=100, epochs=args.epochs, train_val_split=args.data_split, validation_freq=args.val_freq, save_data=True)
 	
 def main(args):
 	#m.evaluate_prediction_time(X, n_predictions=100)
