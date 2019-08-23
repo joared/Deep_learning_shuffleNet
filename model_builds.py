@@ -325,6 +325,14 @@ def conv_cifar10_v2(input_image):
 	l = tf.nn.relu(l)
 	l = tf.nn.max_pool(l, [1,3,3,1], [1,2,2,1], padding="SAME")
 	
+	l = tf.layers.conv2d(l, 96, (3,3), strides=1, padding="same")
+	l = tf.layers.batch_normalization(l)
+	l = tf.nn.relu(l)
+	l = tf.layers.conv2d(l, 96, (3,3), strides=1, padding="same")
+	l = tf.layers.batch_normalization(l)
+	l = tf.nn.relu(l)
+	l = tf.nn.max_pool(l, [1,3,3,1], [1,2,2,1], padding="SAME")
+	
 	h = tf.layers.flatten(l)
 	#h = tf.layers.dense(h, 10, activation="relu")#, activation = "relu")
 	h = tf.layers.dense(h, 10)#, activation = "relu")
