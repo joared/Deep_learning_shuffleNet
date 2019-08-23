@@ -313,11 +313,11 @@ def shufflenet_cifar10_v15(input_image):
 	return l
 
 @cifar10_model
-def test_c1(input_image):
+def test_g1_st_c_1(input_image):
 	# FLOPS: 1.42M
-	group = 3
+	group = 1
 	shuffle = True
-	c_scale = 0.25
+	c_scale = 1
 	l = tf.layers.conv2d(input_image, int(24), 3, strides=2, padding="same")
 	l = bn_relu(l)
 	
@@ -336,9 +336,9 @@ def test_c1(input_image):
 	return l
 
 @cifar10_model
-def test_c2(input_image):
+def test_g1_sf_c_0_25(input_image):
 	# FLOPS: 1.42M
-	group = 3
+	group = 1
 	shuffle = False
 	c_scale = 0.25
 	l = tf.layers.conv2d(input_image, int(24), 3, strides=2, padding="same")
@@ -359,11 +359,11 @@ def test_c2(input_image):
 	return l
 
 @cifar10_model
-def test_c3(input_image):
+def test_g1_st_c_0_25(input_image):
 	# FLOPS: 1.42M
-	group = 3
+	group = 1
 	shuffle = True
-	c_scale = 1
+	c_scale = 0.25
 	l = tf.layers.conv2d(input_image, int(24), 3, strides=2, padding="same")
 	l = bn_relu(l)
 	
