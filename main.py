@@ -104,7 +104,6 @@ def main(args):
 	choice = int(input(": "))
 	choices[choice-1](args)
 
-	
 if __name__ == "__main__":
 	# conv_flops(inp_dim, inp_chan, kernel, filters, stride)
 	# shuffle_unit_flops(inp_size, inp_chan, out_chan, group)
@@ -114,6 +113,20 @@ if __name__ == "__main__":
 	# import pictures as train, val and test
 	# run from terminal
 	# concat training data saves
+	channels = {1:[144, 288, 576],
+			2:[200, 400, 800],
+			3:[240, 480, 960],
+			4:[272, 544, 1088],
+			8:[384, 768, 1536]}
+			
+	g = 3
+	print(channels[g][0])
+	print(channels[g][1])
+	flops = conv_flops(32, 3, 3, 24, 2)
+	flops += shuffle_stage_flops(16, 24, channels[g][0], 3, g, 4)
+	flops += shuffle_stage_flops(8, channels[g][0], channels[g][1], 2, g, 4)
+	flops += channels[g][1]*10 + 16*channels[g][1]
+	print("Flops: {}".format(flops))
 	
 	parser = argparse.ArgumentParser()
 	# training variables
