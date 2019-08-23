@@ -295,7 +295,7 @@ def shufflenet_cifar10_v15(input_image):
 	group = 8
 	shuffle = False
 	c_scale = 0.25
-	l = tf.layers.conv2d(input_image, int(24), 3, strides=1, padding="same")
+	l = tf.layers.conv2d(input_image, int(24), 3, strides=2, padding="same")
 	l = bn_relu(l)
 	
 	l = shufflenet_stage("stage_1", l, channels[group][0]*c_scale, 7, group, shuffle=shuffle)
