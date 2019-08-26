@@ -293,7 +293,7 @@ class Model(object):
 	def evaluate(self):
 		pass
 			
-	def evaluate_prediction_time(self, X, n_predictions=1000):
+	def evaluate_prediction_time(self, X, n_predictions=100):
 		print("Evaluating average prediction time with {} predictions".format(n_predictions))
 		assert self._is_built, "Model not built and can not be evaluated"
 		t_start = time.time()

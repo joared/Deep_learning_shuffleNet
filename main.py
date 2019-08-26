@@ -71,6 +71,24 @@ def choose_model(args):
 	
 	return m
 	
+def flops_calc(args):
+	m = choose_model(args)
+	
+	run_metadata = tf.RunMetadata()
+	X, Y = load_dataset("cifar10")
+	train_op = m.y_pred
+	feed_dict = {m.x: X[0].reshape(1,32,32,3)}
+
+	with m.sess as sess:
+		_ = sess.run(train_op,
+					options=tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE),
+					run_metadata=run_metadata,
+					feed_dict=feed_dict)
+		tf.profiler.profile(
+							tf.get_default_graph(),
+							options=tf.profiler.ProfileOptionBuilder.float_operation(), cmd='scope')
+	#print(run_metadata)
+	
 def eval_pred_time(args):
 	m = choose_model(args)
 	X, Y = load_dataset("cifar10")
@@ -98,7 +116,7 @@ def main(args):
 	#m.evaluate_prediction_time(X, n_predictions=100)
 	#m.train(X[:200, :, :, :], Y[:200], batch_size=10, epochs=10, save_data=False)
 	
-	choices = [train, lr_test, train_plot, eval_pred_time]
+	choices = [train, lr_test, train_plot, eval_pred_time, flops_calc]
 	for i, c in enumerate(choices):
 		print("{}. {}".format(i+1, c.__name__))
 	choice = int(input(": "))
@@ -119,8 +137,8 @@ if __name__ == "__main__":
 			4:[272, 544, 1088],
 			8:[384, 768, 1536]}
 			
-	g = 3
-	c_scale = 0.25
+	g = 1
+	c_scale = 1
 	print(channels[g][0])
 	print(channels[g][1])
 	flops = conv_flops(32, 3, 3, 24, 1)
