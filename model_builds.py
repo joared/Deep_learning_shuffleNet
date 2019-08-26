@@ -528,8 +528,8 @@ def this_one_is_super_mega_awesome(input_image):
 	l = tf.layers.conv2d(input_image, int(24), 3, strides=1, padding="same")
 	l = bn_relu(l)
 	
-	l = shufflenet_stage("stage_1", l, channels[group][1]*c_scale, 7, group, shuffle=shuffle)
-	l = shufflenet_stage("stage_2", l, channels[group][2]*c_scale, 3, group, shuffle=shuffle)
+	l = shufflenet_stage("stage_1", l, channels[group][0]*c_scale, 7, group, shuffle=shuffle)
+	l = shufflenet_stage("stage_2", l, channels[group][1]*c_scale, 3, group, shuffle=shuffle)
 	
 	# global avg pooling with relu
 	print(l.shape)
